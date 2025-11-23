@@ -31,9 +31,9 @@ dist/
 build/
 .next/
 out/
+*.log
 
 # Logs
-*.log
 npm-debug.log*
 
 # OS
@@ -45,4 +45,4 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-
+*~
