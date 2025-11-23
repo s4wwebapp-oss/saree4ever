@@ -1,4 +1,4 @@
-# Other projects (exclude everything except our project)
+# Exclude all other projects
 Adhvaacademy.in clone repo/
 Learning Path bu Adhva-30thSept/
 Learning Path working version -Oct 3rd 2025/
@@ -13,8 +13,7 @@ clone rep-learning path-testing/
 new buidling freshing-cursore plus clone/
 Learning Path bu Adhva-oct2nd final code-workspace.code-workspace
 
-# Keep only these
-!backend/
+# Keep only Saree4ever 24th Nov 25 project
 !Saree4ever 24th Nov 25/
 
 # Dependencies
