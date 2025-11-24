@@ -42,6 +42,8 @@ interface Product {
   type_ids?: string[];
   is_featured: boolean;
   is_active: boolean;
+  primary_image_url?: string | null;
+  image_urls?: string[];
 }
 
 export default function EditProductPage() {
@@ -60,6 +62,8 @@ export default function EditProductPage() {
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   const [formData, setFormData] = useState<Product | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Load product and options
   useEffect(() => {
@@ -136,6 +140,51 @@ export default function EditProductPage() {
       ...formData,
       [name]: newIds,
     });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setUploadError(null);
+
+    try {
+      const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Not authenticated. Please login again.');
+      }
+
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+      if (productId) {
+        uploadFormData.append('productId', productId);
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/upload/product`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
+
+      const data = await response.json();
+      if (formData) {
+        setFormData({ ...formData, primary_image_url: data.url });
+      }
+      setUploadError(null);
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      setUploadError(error.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -238,6 +287,70 @@ export default function EditProductPage() {
               rows={4}
               className="input-field"
             />
+          </div>
+
+          {/* Primary Image */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-1">Primary Image *</label>
+            
+            {/* Image Upload */}
+            <div className="mb-3">
+              <label className="block text-xs text-gray-600 mb-1">Upload Image (Recommended)</label>
+              <input
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                onChange={handleImageUpload}
+                disabled={uploadingImage}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 disabled:opacity-50"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Supported formats: JPEG, PNG, WebP, GIF (Max 10MB)
+              </p>
+              {uploadingImage && (
+                <p className="text-xs text-blue-600 mt-1">Uploading image...</p>
+              )}
+              {uploadError && (
+                <p className="text-xs text-red-600 mt-1">{uploadError}</p>
+              )}
+            </div>
+
+            {/* OR Divider */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">OR</span>
+              </div>
+            </div>
+
+            {/* Image URL Input */}
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">Enter Image URL</label>
+              <input
+                type="url"
+                name="primary_image_url"
+                value={formData.primary_image_url || ''}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+
+            {/* Image Preview */}
+            {formData.primary_image_url && (
+              <div className="mt-3">
+                <p className="text-xs text-gray-600 mb-1">Current Image:</p>
+                <img 
+                  src={formData.primary_image_url} 
+                  alt="Product preview" 
+                  className="w-32 h-32 object-cover border border-gray-200 rounded"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-4">
