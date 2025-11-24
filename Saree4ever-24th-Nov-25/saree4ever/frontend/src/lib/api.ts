@@ -64,6 +64,7 @@ async function fetchAPI<T>(
     ...options,
     headers,
     signal: options.signal || controller?.signal,
+    cache: 'no-store', // Disable cache to ensure fresh data
   };
 
   if (controller) {

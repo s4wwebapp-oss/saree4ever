@@ -5,6 +5,9 @@ import ProductVariantSelector from '@/components/ProductVariantSelector';
 import ProductImageGallery from '@/components/ProductImageGallery';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
+
 interface Variant {
   id: string;
   name: string;
