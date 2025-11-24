@@ -82,3 +82,4 @@ All API calls go through `src/lib/api.ts` which:
 4. Connect real-time updates (SSE)
 5. Add image optimization
 6. Implement SEO meta tags
+# Deployment trigger
