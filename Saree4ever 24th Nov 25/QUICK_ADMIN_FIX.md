@@ -141,3 +141,4 @@ Copy this and paste it as your JWT_SECRET in backend/.env
 
 Just follow the 5 steps above and you're good to go! 🎉
 
+
