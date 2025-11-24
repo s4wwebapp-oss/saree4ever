@@ -1,0 +1,435 @@
+[
+  {
+    "id": "TC001",
+    "title": "Homepage Loads with Featured Products and Hero Banner",
+    "description": "Verify that the homepage loads successfully with hero banners, featured products grid, and primary CTAs visible and functional.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the homepage URL"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the hero banner section is displayed with proper images and text"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify featured products grid is visible with product images, titles, and prices"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that CTA buttons (e.g., Shop Now) on homepage work and navigate to expected pages"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Product Listing Filters and Sorting Functionality",
+    "description": "Verify product collection pages support filtering by price, fabric/type, color and support sorting by price/popularity.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open a collection products listing page"
+      },
+      {
+        "type": "action",
+        "description": "Apply price range filter and verify product results update accordingly"
+      },
+      {
+        "type": "action",
+        "description": "Apply fabric/type filter and verify products match selected fabrics/types"
+      },
+      {
+        "type": "action",
+        "description": "Apply color filter and verify products match selected colors"
+      },
+      {
+        "type": "action",
+        "description": "Change sorting option to price ascending and verify product order"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that filters can be combined and results reflect all applied filters"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Product Detail Page Displays Correct Variant Options",
+    "description": "Verify that on a product detail page, all variant selectors (color, blouse options) are displayed, selectable, and that selecting variants updates price and stock availability correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to a product detail page with multiple variants"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that variant options for color and blouse are shown"
+      },
+      {
+        "type": "action",
+        "description": "Select each available variant option and verify the displayed price updates accordingly"
+      },
+      {
+        "type": "assertion",
+        "description": "Product stock availability updates correctly based on selected variants"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Add to Cart with Variant Selection and Stock Validation",
+    "description": "Verify that users can add products with specific variants to the shopping cart. Cart should enforce stock validation preventing adding quantities exceeding stock.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Select product variants on product detail page"
+      },
+      {
+        "type": "action",
+        "description": "Add a valid quantity (<= available stock) of the product to the cart"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the cart is updated with the selected product, variant, and quantity"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to add a quantity greater than available stock to the cart"
+      },
+      {
+        "type": "assertion",
+        "description": "Cart prevents adding quantity exceeding stock and displays appropriate error message"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Shopping Cart Persistence Across Sessions",
+    "description": "Ensure that the shopping cart contents persist across browsing sessions using localStorage, and quantities can be updated with stock validation.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add products with variants to the cart"
+      },
+      {
+        "type": "action",
+        "description": "Close the browser tab and reopen the site"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the previously added cart items are still present with correct quantities"
+      },
+      {
+        "type": "action",
+        "description": "Update the quantity of a cart item within available stock limits"
+      },
+      {
+        "type": "assertion",
+        "description": "Cart updates the quantity and recalculates totals correctly"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to update quantity beyond stock and verify error handling"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Checkout Process with Shipping/Billing and Razorpay Integration",
+    "description": "Verify the complete checkout flow including form validation for shipping and billing addresses, stock reservation, Razorpay payment flow, and confirmation on successful payment.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Proceed to checkout from the cart page"
+      },
+      {
+        "type": "action",
+        "description": "Fill in valid shipping and billing information with all required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Check form validations trigger for missing or invalid inputs"
+      },
+      {
+        "type": "action",
+        "description": "Submit the order to initiate Razorpay payment"
+      },
+      {
+        "type": "assertion",
+        "description": "Backend reserves stock upon order initiation, preventing overselling"
+      },
+      {
+        "type": "action",
+        "description": "Complete the Razorpay payment flow successfully"
+      },
+      {
+        "type": "assertion",
+        "description": "Order status updates to 'Paid' and stock is committed"
+      },
+      {
+        "type": "action",
+        "description": "Simulate Razorpay payment failure"
+      },
+      {
+        "type": "assertion",
+        "description": "Reserved stock rolls back and order is not confirmed"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Order Tracking Timeline Displays Real-time Status Updates",
+    "description": "Verify that the order tracking page shows an Amazon-style status timeline accurately reflecting the order status from pending to delivered with shipment details.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and navigate to an active order's tracking page"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the order status timeline correctly shows current order status stages"
+      },
+      {
+        "type": "action",
+        "description": "Simulate status updates backend (pending, processing, shipped, delivered)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify timeline updates in real-time to reflect those status changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Order shipment details such as tracking number and carrier information are displayed correctly"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Admin Dashboard Secure Login and JWT Authentication",
+    "description": "Verify that the admin dashboard login requires valid credentials, enforces JWT authentication, and restricts unauthorized access.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the admin dashboard login page"
+      },
+      {
+        "type": "action",
+        "description": "Attempt login with invalid credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login is rejected and error message is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Login with valid admin credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify JWT token is received and stored securely"
+      },
+      {
+        "type": "action",
+        "description": "Try accessing admin dashboard pages without JWT or with expired token"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied and user is redirected to login page"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Admin Product Management CRUD Operations",
+    "description": "Validate that the admin can create, read, update, and delete products, variants, collections, and offers successfully through the admin dashboard UI.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login to admin dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to product management page"
+      },
+      {
+        "type": "action",
+        "description": "Create a new product with multiple variants and assign to a collection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new product and variants appear in the product list and frontend properly"
+      },
+      {
+        "type": "action",
+        "description": "Update product details such as price, description, and variant stock levels"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure updates are saved and reflected on frontend product pages"
+      },
+      {
+        "type": "action",
+        "description": "Delete a product and verify it disappears from listing and frontend"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "CSV Bulk Import for Products, Variants, Stock, and Offers",
+    "description": "Verify that uploading CSV files via the admin import interface correctly creates or updates products, variants, stock levels, and offer data without data loss or corruption.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login to admin dashboard and navigate to CSV import page"
+      },
+      {
+        "type": "action",
+        "description": "Upload a valid CSV file containing multiple products with variants, stock, and offers"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify import succeeds without errors and a success message is shown"
+      },
+      {
+        "type": "assertion",
+        "description": "Check on the product management page that imported products and variants are present with correct details"
+      },
+      {
+        "type": "action",
+        "description": "Upload malformed or incomplete CSV data"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the system detects errors and reports them without corrupting existing data"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "AI Chatbot Responds with Accurate Product Recommendations and Insights",
+    "description": "Verify that the AI chatbot integrated into the frontend and admin interfaces responds accurately based on product database, current stock, and active offers using secure backend endpoints.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open AI chatbot on customer-facing site"
+      },
+      {
+        "type": "action",
+        "description": "Ask chatbot for saree recommendations within specific color or fabric preferences"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify chatbot responses include relevant products currently in stock and reflect active offers"
+      },
+      {
+        "type": "action",
+        "description": "Open AI chatbot on admin dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Query for sales analytics or stock alerts"
+      },
+      {
+        "type": "assertion",
+        "description": "Check chatbot provides real-time insights based on backend data securely"
+      },
+      {
+        "type": "action",
+        "description": "Attempt unauthorized API requests to the chatbot backend"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm access is denied without proper authentication tokens"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Frontend UI Visual Consistency with Editorial Black-and-White Theme",
+    "description": "Verify that the frontend pages consistently adhere to the black-and-white editorial theme with full-color product imagery, including Header and Footer components and responsive behavior across devices.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to multiple pages: homepage, product listings, product detail, offers, checkout, order tracking"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that global layout uses consistent black-and-white typography, backgrounds, and UI components"
+      },
+      {
+        "type": "assertion",
+        "description": "Product images display full color against black-and-white theme backgrounds"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify header menu, search, cart icon, and footer links are styled consistently"
+      },
+      {
+        "type": "action",
+        "description": "Resize browser window or use mobile device emulation"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure pages remain visually consistent and responsive with no layout breakage"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Performance and Security on Vercel Deployment",
+    "description": "Verify fast page load performance for critical pages and secure authentication flows using Supabase and JWT on the Vercel deployment environment.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access the deployed site on Vercel for homepage, product detail, cart, checkout, and admin pages"
+      },
+      {
+        "type": "assertion",
+        "description": "Measure page load times and verify they are within acceptable performance thresholds"
+      },
+      {
+        "type": "action",
+        "description": "Test authentication flows for customer login and admin login using Supabase"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that JWT tokens are used where expected and that secure pages block unauthorized access"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access API endpoints without authentication and with expired JWT"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure API returns proper error codes and denies access"
+      }
+    ]
+  }
+]
