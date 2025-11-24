@@ -211,8 +211,8 @@ async function seedMockData() {
         collection_id: collectionIds['kanjivaram'],
         category_id: categoryIds['silk'],
         type_id: typeIds['traditional'],
-        base_price: 13455,
-        compare_at_price: 14950,
+        base_price: 25000,
+        compare_at_price: 32000,
         primary_image_url: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&q=80',
         image_urls: [
           'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&q=80',
@@ -704,7 +704,93 @@ async function seedMockData() {
       }
     }
 
-    // 5. Create Hero Slides
+    // 5. Create Variants (New Section)
+    console.log('\n🧬 Creating variants...');
+    const variants = [
+      // Kanjivaram Pure Silk Variants
+      {
+        product_slug: 'kanjivaram-pure-silk',
+        name: 'Kanjivaram Pure Silk - Maroon',
+        sku: 'KAN-PURE-MAR-001',
+        price: 25000,
+        compare_at_price: 32000,
+        color: 'Maroon',
+        stock_quantity: 15,
+        track_inventory: true,
+        has_blouse: true,
+        blouse_included: true,
+        is_active: true,
+        image_url: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&q=80'
+      },
+      {
+        product_slug: 'kanjivaram-pure-silk',
+        name: 'Kanjivaram Pure Silk - Gold',
+        sku: 'KAN-PURE-GLD-002',
+        price: 25000,
+        compare_at_price: 32000,
+        color: 'Gold',
+        stock_quantity: 10,
+        track_inventory: true,
+        has_blouse: true,
+        blouse_included: true,
+        is_active: true,
+        image_url: 'https://images.unsplash.com/photo-1583391726247-e99ecdf93da2?w=800&q=80'
+      },
+      // Royal Bridal Banarasi Variants
+      {
+        product_slug: 'royal-bridal-banarasi',
+        name: 'Royal Bridal Banarasi - Red',
+        sku: 'BAN-BRD-RED-001',
+        price: 25000,
+        compare_at_price: 32000,
+        color: 'Red',
+        stock_quantity: 5,
+        track_inventory: true,
+        has_blouse: true,
+        blouse_included: true,
+        is_active: true,
+        image_url: 'https://images.unsplash.com/photo-1596234728853-75237d9094c7?w=800&q=80'
+      }
+    ];
+
+    for (const variant of variants) {
+      const productId = productIds[variant.product_slug];
+      if (!productId) {
+        console.warn(`⚠️ Skipping variant ${variant.name}: Product not found`);
+        continue;
+      }
+
+      const variantData = { ...variant, product_id: productId };
+      delete variantData.product_slug; // Remove slug as it's not in schema
+
+      // Check if variant exists (by sku)
+      const { data: existingVariant } = await supabase
+        .from('variants')
+        .select('id')
+        .eq('sku', variant.sku)
+        .single();
+
+      if (existingVariant) {
+        // Update
+        const { error } = await supabase
+          .from('variants')
+          .update(variantData)
+          .eq('id', existingVariant.id);
+          
+        if (error) console.error(`Error updating variant ${variant.name}:`, error.message);
+        else console.log(`✅ Updated variant: ${variant.name}`);
+      } else {
+        // Insert
+        const { error } = await supabase
+          .from('variants')
+          .insert(variantData);
+          
+        if (error) console.error(`Error creating variant ${variant.name}:`, error.message);
+        else console.log(`✅ Created variant: ${variant.name}`);
+      }
+    }
+
+    // 6. Create Hero Slides
     console.log('\n🖼️ Creating hero slides...');
     
     // First, delete existing slides to ensure fresh start (optional, but cleaner for seed)
@@ -757,7 +843,7 @@ async function seedMockData() {
       }
     }
 
-    // 6. Create Testimonials
+    // 7. Create Testimonials
     console.log('\n💬 Creating testimonials...');
     
     // Clear existing testimonials
@@ -816,7 +902,7 @@ async function seedMockData() {
         }
     }
 
-    // 7. Create Blog Posts
+    // 8. Create Blog Posts
     console.log('\n📝 Creating blog posts...');
     const blogPosts = [
       {
