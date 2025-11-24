@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -65,6 +65,7 @@ export default function EditProductPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [subcategoriesInput, setSubcategoriesInput] = useState<string>('');
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
 
   // Load product and options
   useEffect(() => {
@@ -182,11 +183,35 @@ export default function EditProductPage() {
         setFormData({ ...formData, primary_image_url: data.url });
       }
       setUploadError(null);
+      
+      // Reset file input
+      if (imageFileInputRef.current) {
+        imageFileInputRef.current.value = '';
+      }
     } catch (error: any) {
       console.error('Upload error:', error);
       setUploadError(error.message || 'Failed to upload image');
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const handleReplaceImage = () => {
+    // Trigger file input click
+    if (imageFileInputRef.current) {
+      imageFileInputRef.current.click();
+    }
+  };
+
+  const handleDeleteImage = () => {
+    if (confirm('Are you sure you want to delete this product image?')) {
+      if (formData) {
+        setFormData({ ...formData, primary_image_url: null });
+      }
+      // Reset file input
+      if (imageFileInputRef.current) {
+        imageFileInputRef.current.value = '';
+      }
     }
   };
 
@@ -294,28 +319,91 @@ export default function EditProductPage() {
 
           {/* Primary Image */}
           <div className="mt-4">
-            <label className="block text-sm font-medium mb-1">Primary Image *</label>
+            <label className="block text-sm font-medium mb-1">Product Photo *</label>
             
-            {/* Image Upload */}
-            <div className="mb-3">
-              <label className="block text-xs text-gray-600 mb-1">Upload Image (Recommended)</label>
-              <input
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                onChange={handleImageUpload}
-                disabled={uploadingImage}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800 disabled:opacity-50"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Supported formats: JPEG, PNG, WebP, GIF (Max 10MB)
-              </p>
-              {uploadingImage && (
-                <p className="text-xs text-blue-600 mt-1">Uploading image...</p>
-              )}
-              {uploadError && (
-                <p className="text-xs text-red-600 mt-1">{uploadError}</p>
-              )}
-            </div>
+            {/* Current Image Display with Actions */}
+            {formData.primary_image_url ? (
+              <div className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="flex items-start space-x-4">
+                  {/* Image Preview */}
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={formData.primary_image_url} 
+                      alt="Product preview" 
+                      className="w-32 h-32 object-cover border border-gray-300 rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Image Info and Actions */}
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Current Product Image</p>
+                    <p className="text-xs text-gray-500 mb-3 break-all">{formData.primary_image_url}</p>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={handleReplaceImage}
+                        disabled={uploadingImage}
+                        className="px-3 py-1.5 text-xs font-medium text-white bg-black hover:bg-gray-800 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {uploadingImage ? 'Uploading...' : 'Replace Image'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeleteImage}
+                        disabled={uploadingImage}
+                        className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Delete Image
+                      </button>
+                    </div>
+                    
+                    {uploadError && (
+                      <p className="text-xs text-red-600 mt-2">{uploadError}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* No Image - Show Upload Section */
+              <div className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                <p className="text-sm text-gray-600 mb-3">No product image uploaded</p>
+                {uploadError && (
+                  <p className="text-xs text-red-600 mb-2">{uploadError}</p>
+                )}
+              </div>
+            )}
+
+            {/* Hidden File Input */}
+            <input
+              ref={imageFileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+              onChange={handleImageUpload}
+              disabled={uploadingImage}
+              className="hidden"
+            />
+
+            {/* Upload Button (shown when no image or for replacing) */}
+            {!formData.primary_image_url && (
+              <div className="mb-3">
+                <button
+                  type="button"
+                  onClick={() => imageFileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploadingImage ? 'Uploading...' : 'Upload Product Photo'}
+                </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  Supported formats: JPEG, PNG, WebP, GIF (Max 10MB)
+                </p>
+              </div>
+            )}
 
             {/* OR Divider */}
             <div className="relative my-4">
@@ -327,9 +415,11 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Image URL Input */}
+            {/* Image URL Input - Always available */}
             <div>
-              <label className="block text-xs text-gray-600 mb-1">Enter Image URL</label>
+              <label className="block text-xs text-gray-600 mb-1">
+                {formData.primary_image_url ? 'Update Image URL' : 'Enter Image URL'}
+              </label>
               <input
                 type="url"
                 name="primary_image_url"
@@ -338,22 +428,10 @@ export default function EditProductPage() {
                 className="input-field"
                 placeholder="https://example.com/image.jpg"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Paste an image URL directly (e.g., from Supabase Storage or external source)
+              </p>
             </div>
-
-            {/* Image Preview */}
-            {formData.primary_image_url && (
-              <div className="mt-3">
-                <p className="text-xs text-gray-600 mb-1">Current Image:</p>
-                <img 
-                  src={formData.primary_image_url} 
-                  alt="Product preview" 
-                  className="w-32 h-32 object-cover border border-gray-200 rounded"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-4">
