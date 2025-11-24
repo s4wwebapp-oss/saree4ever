@@ -26,9 +26,33 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // CORS configuration
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+// Normalize URL - remove trailing slash for consistent matching
+const normalizedFrontendUrl = frontendUrl.replace(/\/$/, '');
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Normalize origin - remove trailing slash
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    
+    // Check if origin matches (with or without trailing slash)
+    if (normalizedOrigin === normalizedFrontendUrl || origin === frontendUrl) {
+      callback(null, true);
+    } else {
+      // Also allow localhost for development
+      if (normalizedOrigin.includes('localhost') || normalizedOrigin.includes('127.0.0.1')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 // Middleware
