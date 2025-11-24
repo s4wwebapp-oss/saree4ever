@@ -101,11 +101,15 @@ export default function ProductVariantSelector({
     alert('Added to cart!');
   };
 
+  // If no variants, use product base price
+  const hasVariants = safeVariants.length > 0;
   const displayPrice = selectedVariant?.price || product.base_price || 0;
-  const displayComparePrice = selectedVariant?.compare_at_price || null;
+  const displayComparePrice = selectedVariant?.compare_at_price || product.compare_at_price || null;
   const isOutOfStock = availableStock !== null && availableStock === 0;
   const isLowStock = availableStock !== null && availableStock > 0 && availableStock < 5;
-  const canAddToCart = selectedVariant && availableStock !== null && availableStock >= quantity;
+  const canAddToCart = hasVariants 
+    ? (selectedVariant && availableStock !== null && availableStock >= quantity)
+    : (product.base_price && product.base_price > 0);
 
   return (
     <div className="space-y-6">
@@ -224,8 +228,73 @@ export default function ProductVariantSelector({
         </div>
       )}
 
-      {!selectedVariant && (
+      {!selectedVariant && hasVariants && (
         <p className="text-sm text-gray-600">Please select a color to continue</p>
+      )}
+      
+      {/* Show add to cart for products without variants */}
+      {!hasVariants && product.base_price && product.base_price > 0 && (
+        <div className="border-t border-gray-200 pt-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm text-gray-600">Product Price</p>
+            </div>
+            <div className="text-right">
+              <span className="text-xl font-semibold">₹{displayPrice.toLocaleString()}</span>
+              {displayComparePrice && displayPrice > 0 && displayComparePrice > displayPrice && (
+                <span className="block text-sm text-gray-500 line-through">
+                  ₹{displayComparePrice.toLocaleString()}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Quantity Selector */}
+          <div className="flex items-center space-x-4 mb-4">
+            <label className="font-medium">Quantity</label>
+            <div className="flex items-center border border-black">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                className="px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                −
+              </button>
+              <span className="px-4 py-1 min-w-[3rem] text-center">{quantity}</span>
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                className="px-3 py-1"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Add to Cart Button */}
+          <button
+            onClick={() => {
+              if (product.base_price) {
+                addItem({
+                  variantId: product.id, // Use product ID as variant ID for products without variants
+                  productId: product.id,
+                  quantity,
+                  price: product.base_price,
+                  image: product.primary_image_url || '',
+                  title: product.name,
+                  variantName: product.name,
+                });
+                alert('Added to cart!');
+              }
+            }}
+            className="w-full py-3 font-medium btn-primary"
+          >
+            Add to Cart
+          </button>
+        </div>
+      )}
+      
+      {!hasVariants && (!product.base_price || product.base_price === 0) && (
+        <p className="text-sm text-gray-600">Product pricing information will be available soon</p>
       )}
     </div>
   );
