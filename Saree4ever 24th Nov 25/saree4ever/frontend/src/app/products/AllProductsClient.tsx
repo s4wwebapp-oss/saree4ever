@@ -97,25 +97,10 @@ export default function AllProductsClient({ initialProducts, initialSearchParams
       <aside className="lg:w-64 flex-shrink-0">
         <div className="sticky top-24">
           <FiltersSidebarEnhanced
-            search={search}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-            selectedCollections={selectedCollections}
-            selectedCategories={selectedCategories}
-            selectedTypes={selectedTypes}
-            selectedColors={selectedColors}
-            selectedSubcategories={selectedSubcategories}
-            sortBy={sortBy}
-            onSearchChange={(value) => updateFilters({ search: value })}
-            onMinPriceChange={(value) => updateFilters({ minPrice: value })}
-            onMaxPriceChange={(value) => updateFilters({ maxPrice: value })}
-            onCollectionsChange={(value) => updateFilters({ selectedCollections: value })}
-            onCategoriesChange={(value) => updateFilters({ selectedCategories: value })}
-            onTypesChange={(value) => updateFilters({ selectedTypes: value })}
-            onColorsChange={(value) => updateFilters({ selectedColors: value })}
-            onSubcategoriesChange={(value) => updateFilters({ selectedSubcategories: value })}
-            onSortChange={(value) => updateFilters({ sortBy: value })}
-            onClearFilters={clearFilters}
+            onFiltersChange={() => {
+              // Filters are managed internally by the component
+              // This callback can be used to trigger parent updates if needed
+            }}
           />
         </div>
       </aside>
