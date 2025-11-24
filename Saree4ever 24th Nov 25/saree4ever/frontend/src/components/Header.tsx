@@ -32,6 +32,12 @@ interface Announcement {
   is_active: boolean;
 }
 
+interface MenuConfig {
+  column_1_title: string;
+  column_2_title: string;
+  column_3_title: string;
+}
+
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,6 +45,7 @@ export default function Header() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [types, setTypes] = useState<Type[]>([]);
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+  const [menuConfigs, setMenuConfigs] = useState<Record<string, MenuConfig>>({});
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { itemCount } = useCart();
   const pathname = usePathname();
@@ -46,15 +53,16 @@ export default function Header() {
   const collectionsDropdownRef = useRef<HTMLDivElement>(null);
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch collections, categories, types, and announcement
+  // Fetch collections, categories, types, announcement, and menu configs
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [collectionsRes, categoriesRes, typesRes, announcementRes] = await Promise.all([
+        const [collectionsRes, categoriesRes, typesRes, announcementRes, menuConfigRes] = await Promise.all([
           api.collections.getAll(),
           api.categories.getAll(),
           api.types.getAll(),
           api.announcement.getActive().catch(() => ({ announcement: null })), // Gracefully handle if no announcement
+          api.menuConfig.getAll().catch(() => ({ configs: {} })), // Gracefully handle if no menu config
         ]);
         
         // Normalize collections
@@ -74,6 +82,10 @@ export default function Header() {
         if (announcementData) {
           setAnnouncement(announcementData);
         }
+
+        // Set menu configs
+        const configsData = (menuConfigRes as { configs?: Record<string, MenuConfig> }).configs || {};
+        setMenuConfigs(configsData);
       } catch (error) {
         console.error('Failed to fetch navigation data:', error);
       }
@@ -180,7 +192,11 @@ export default function Header() {
               <div className="relative" ref={shopDropdownRef}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'shop' ? null : 'shop')}
-                  className="text-sm font-medium text-black hover:underline flex items-center space-x-1"
+                  className={`text-sm flex items-center space-x-1 transition-colors ${
+                    openDropdown === 'shop' 
+                      ? 'text-[#800000] font-bold underline' 
+                      : 'text-black font-medium hover:text-[#800000] hover:font-bold hover:underline'
+                  }`}
                 >
                   <span>Shop By</span>
                   <svg
@@ -200,54 +216,405 @@ export default function Header() {
                   </svg>
                 </button>
                 {openDropdown === 'shop' && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white border border-gray-200 shadow-2xl rounded-sm py-8 px-10 z-50 min-w-[550px] max-w-[950px]">
-                    <div className="flex flex-col gap-8">
-                      {/* Types Section */}
-                      {types.length > 0 && (
-                        <div>
-                          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.15em] mb-4 pb-2.5 border-b border-gray-200">
-                            Shop By Type
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-10 gap-y-3.5">
-                            {types.map((type) => (
-                              <Link
-                                key={type.id}
-                                href={`/types/${type.slug}`}
-                                className="text-sm font-normal text-gray-600 hover:text-black hover:font-medium transition-all duration-200 whitespace-nowrap relative group"
-                                onClick={() => setOpenDropdown(null)}
-                              >
-                                <span className="relative">
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-2xl z-50 w-[600px]">
+                    <div className="grid grid-cols-3 gap-0 py-3 px-3">
+                      {/* Column 1 */}
+                      <div className="pr-0 w-full">
+                        <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
+                          {menuConfigs.shop_by?.column_1_title || 'HERITAGE SILKS'}
+                        </h3>
+                        <ul className="space-y-1.5 w-full">
+                          {types
+                            .filter((type) => {
+                              const name = type.name.toLowerCase();
+                              return (
+                                name.includes('kanjeevaram') ||
+                                name.includes('kanchipuram') ||
+                                name.includes('banarasi') ||
+                                name.includes('paithani') ||
+                                name.includes('tussar') ||
+                                name.includes('mysore') ||
+                                name.includes('kosa') ||
+                                name.includes('muga') ||
+                                name.includes('silk')
+                              );
+                            })
+                            .map((type) => (
+                              <li key={type.id}>
+                                <Link
+                                  href={`/types/${type.slug}`}
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
                                   {type.name}
-                                  <span className="absolute bottom-0 left-0 w-0 h-px bg-black transition-all duration-200 group-hover:w-full"></span>
-                                </span>
-                              </Link>
+                                </Link>
+                              </li>
                             ))}
-                          </div>
-                        </div>
-                      )}
-                      {/* Categories Section */}
-                      {categories.length > 0 && (
-                        <div>
-                          <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.15em] mb-4 pb-2.5 border-b border-gray-200">
-                            Shop By Category
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-10 gap-y-3.5">
-                            {categories.map((category) => (
-                              <Link
-                                key={category.id}
-                                href={`/categories/${category.slug}`}
-                                className="text-sm font-normal text-gray-600 hover:text-black hover:font-medium transition-all duration-200 whitespace-nowrap relative group"
-                                onClick={() => setOpenDropdown(null)}
-                              >
-                                <span className="relative">
-                                  {category.name}
-                                  <span className="absolute bottom-0 left-0 w-0 h-px bg-black transition-all duration-200 group-hover:w-full"></span>
-                                </span>
-                              </Link>
+                          {/* Fallback items if types don't exist */}
+                          {types.filter((type) => {
+                            const name = type.name.toLowerCase();
+                            return (
+                              name.includes('kanjeevaram') ||
+                              name.includes('kanchipuram') ||
+                              name.includes('banarasi') ||
+                              name.includes('paithani') ||
+                              name.includes('tussar') ||
+                              name.includes('mysore') ||
+                              name.includes('kosa') ||
+                              name.includes('muga') ||
+                              name.includes('silk')
+                            );
+                          }).length === 0 && (
+                            <>
+                              <li>
+                                <Link
+                                  href="/products?type=kanjeevaram"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Kanjeevaram / Kanchipuram Silk
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=banarasi"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Banarasi Silk
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=paithani"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Paithani
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=tussar"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Tussar / Tussar Silk
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=mysore"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Mysore Silk
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=kosa"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Kosa Silk
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=muga"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Muga Silk
+                                </Link>
+                              </li>
+                            </>
+                          )}
+                        </ul>
+                      </div>
+
+                      {/* Column 2 */}
+                      <div className="px-0 w-full">
+                        <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
+                          {menuConfigs.shop_by?.column_2_title || 'COTTON & HANDLOOM'}
+                        </h3>
+                        <ul className="space-y-1.5 w-full">
+                          {types
+                            .filter((type) => {
+                              const name = type.name.toLowerCase();
+                              return (
+                                name.includes('cotton') ||
+                                name.includes('chanderi') ||
+                                name.includes('jamdani') ||
+                                name.includes('linen') ||
+                                name.includes('ikat') ||
+                                name.includes('pochampally') ||
+                                name.includes('patola') ||
+                                name.includes('sambalpuri') ||
+                                name.includes('gadwal') ||
+                                name.includes('tant') ||
+                                name.includes('bengal') ||
+                                name.includes('handloom')
+                              );
+                            })
+                            .map((type) => (
+                              <li key={type.id}>
+                                <Link
+                                  href={`/types/${type.slug}`}
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  {type.name}
+                                </Link>
+                              </li>
                             ))}
-                          </div>
-                        </div>
-                      )}
+                          {/* Fallback items if types don't exist */}
+                          {types.filter((type) => {
+                            const name = type.name.toLowerCase();
+                            return (
+                              name.includes('cotton') ||
+                              name.includes('chanderi') ||
+                              name.includes('jamdani') ||
+                              name.includes('linen') ||
+                              name.includes('ikat') ||
+                              name.includes('pochampally') ||
+                              name.includes('patola') ||
+                              name.includes('sambalpuri') ||
+                              name.includes('gadwal') ||
+                              name.includes('tant') ||
+                              name.includes('bengal') ||
+                              name.includes('handloom')
+                            );
+                          }).length === 0 && (
+                            <>
+                              <li>
+                                <Link
+                                  href="/products?type=cotton"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Cotton Saree
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=chanderi"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Chanderi
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=jamdani"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Jamdani
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=linen"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Linen Saree
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=ikat"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Ikat / Pochampally
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=patola"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Patola
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=sambalpuri"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Sambalpuri
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=gadwal"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Gadwal
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=tant"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Tant / Bengal Cotton
+                                </Link>
+                              </li>
+                            </>
+                          )}
+                        </ul>
+                      </div>
+
+                      {/* Column 3 */}
+                      <div className="pl-0 w-full">
+                        <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
+                          {menuConfigs.shop_by?.column_3_title || 'MODERN & CONTEMPORARY'}
+                        </h3>
+                        <ul className="space-y-1.5 w-full">
+                          {types
+                            .filter((type) => {
+                              const name = type.name.toLowerCase();
+                              return (
+                                name.includes('chiffon') ||
+                                name.includes('georgette') ||
+                                name.includes('organza') ||
+                                name.includes('crepe') ||
+                                name.includes('printed') ||
+                                name.includes('embroidered') ||
+                                name.includes('sequined') ||
+                                name.includes('stonework') ||
+                                name.includes('semi-stitched') ||
+                                name.includes('ready-to-wear') ||
+                                name.includes('contemporary') ||
+                                name.includes('modern')
+                              );
+                            })
+                            .map((type) => (
+                              <li key={type.id}>
+                                <Link
+                                  href={`/types/${type.slug}`}
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  {type.name}
+                                </Link>
+                              </li>
+                            ))}
+                          {/* Fallback items if types don't exist */}
+                          {types.filter((type) => {
+                            const name = type.name.toLowerCase();
+                            return (
+                              name.includes('chiffon') ||
+                              name.includes('georgette') ||
+                              name.includes('organza') ||
+                              name.includes('crepe') ||
+                              name.includes('printed') ||
+                              name.includes('embroidered') ||
+                              name.includes('sequined') ||
+                              name.includes('stonework') ||
+                              name.includes('semi-stitched') ||
+                              name.includes('ready-to-wear') ||
+                              name.includes('contemporary') ||
+                              name.includes('modern')
+                            );
+                          }).length === 0 && (
+                            <>
+                              <li>
+                                <Link
+                                  href="/products?type=chiffon"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Chiffon
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=georgette"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Georgette
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=organza"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Organza
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=crepe"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Crepe
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=printed"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Printed Saree
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=embroidered"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Embroidered Saree
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=sequined"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Sequined / Stonework
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/products?type=semi-stitched"
+                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
+                                  onClick={() => setOpenDropdown(null)}
+                                >
+                                  Semi-stitched / Ready-to-wear
+                                </Link>
+                              </li>
+                            </>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    {/* View All Fabrics Link */}
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                      <Link
+                        href="/products"
+                        className="text-sm font-medium text-black hover:underline uppercase tracking-wide text-center block"
+                        onClick={() => setOpenDropdown(null)}
+                      >
+                        VIEW ALL FABRICS
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -257,7 +624,11 @@ export default function Header() {
               <div className="relative" ref={collectionsDropdownRef}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'collections' ? null : 'collections')}
-                  className="text-sm font-medium text-black hover:underline flex items-center space-x-1"
+                  className={`text-sm flex items-center space-x-1 transition-colors ${
+                    openDropdown === 'collections' 
+                      ? 'text-[#800000] font-bold underline' 
+                      : 'text-black font-medium hover:text-[#800000] hover:font-bold hover:underline'
+                  }`}
                 >
                   <span>Collections</span>
                   <svg
@@ -277,21 +648,53 @@ export default function Header() {
                   </svg>
                 </button>
                 {openDropdown === 'collections' && collections.length > 0 && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white border border-gray-200 shadow-2xl rounded-sm py-8 px-10 z-50 min-w-[550px] max-w-[950px]">
-                    <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3.5">
-                      {collections.map((collection) => (
-                        <Link
-                          key={collection.id}
-                          href={`/collections/${collection.slug}`}
-                          className="text-sm font-normal text-gray-600 hover:text-black hover:font-medium transition-all duration-200 whitespace-nowrap relative group"
-                          onClick={() => setOpenDropdown(null)}
-                        >
-                          <span className="relative">
-                            {collection.name}
-                            <span className="absolute bottom-0 left-0 w-0 h-px bg-black transition-all duration-200 group-hover:w-full"></span>
-                          </span>
-                        </Link>
-                      ))}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-2xl z-50 w-[600px]">
+                    <div className="grid grid-cols-3 gap-0 py-3 px-3">
+                      {/* Distribute collections across 3 columns */}
+                      {Array.from({ length: 3 }).map((_, colIndex) => {
+                        const itemsPerColumn = Math.ceil(collections.length / 3);
+                        const startIndex = colIndex * itemsPerColumn;
+                        const endIndex = startIndex + itemsPerColumn;
+                        const columnCollections = collections.slice(startIndex, endIndex);
+                        const columnTitle = colIndex === 0 
+                          ? (menuConfigs.collections?.column_1_title || 'FEATURED COLLECTIONS')
+                          : colIndex === 1 
+                          ? (menuConfigs.collections?.column_2_title || 'POPULAR COLLECTIONS')
+                          : (menuConfigs.collections?.column_3_title || 'NEW COLLECTIONS');
+                        
+                        return (
+                          <div
+                            key={colIndex}
+                            className={`${colIndex > 0 ? 'px-0' : 'pr-0'} w-full`}
+                          >
+                            <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
+                              {columnTitle}
+                            </h3>
+                            <ul className="space-y-1.5 w-full">
+                              {columnCollections.map((collection) => (
+                                <li key={collection.id}>
+                                  <Link
+                                    href={`/collections/${collection.slug}`}
+                                    className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
+                                    onClick={() => setOpenDropdown(null)}
+                                  >
+                                    {collection.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                      <Link
+                        href="/collections"
+                        className="text-sm font-medium text-black hover:underline uppercase tracking-wide text-center block"
+                        onClick={() => setOpenDropdown(null)}
+                      >
+                        VIEW ALL COLLECTIONS
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -301,7 +704,11 @@ export default function Header() {
               <div className="relative" ref={categoriesDropdownRef}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'categories' ? null : 'categories')}
-                  className="text-sm font-medium text-black hover:underline flex items-center space-x-1"
+                  className={`text-sm flex items-center space-x-1 transition-colors ${
+                    openDropdown === 'categories' 
+                      ? 'text-[#800000] font-bold underline' 
+                      : 'text-black font-medium hover:text-[#800000] hover:font-bold hover:underline'
+                  }`}
                 >
                   <span>Categories</span>
                   <svg
@@ -321,21 +728,53 @@ export default function Header() {
                   </svg>
                 </button>
                 {openDropdown === 'categories' && categories.length > 0 && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white border border-gray-200 shadow-2xl rounded-sm py-8 px-10 z-50 min-w-[550px] max-w-[950px]">
-                    <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3.5">
-                      {categories.map((category) => (
-                        <Link
-                          key={category.id}
-                          href={`/categories/${category.slug}`}
-                          className="text-sm font-normal text-gray-600 hover:text-black hover:font-medium transition-all duration-200 whitespace-nowrap relative group"
-                          onClick={() => setOpenDropdown(null)}
-                        >
-                          <span className="relative">
-                            {category.name}
-                            <span className="absolute bottom-0 left-0 w-0 h-px bg-black transition-all duration-200 group-hover:w-full"></span>
-                          </span>
-                        </Link>
-                      ))}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-2xl z-50 w-[600px]">
+                    <div className="grid grid-cols-3 gap-0 py-3 px-3">
+                      {/* Distribute categories across 3 columns */}
+                      {Array.from({ length: 3 }).map((_, colIndex) => {
+                        const itemsPerColumn = Math.ceil(categories.length / 3);
+                        const startIndex = colIndex * itemsPerColumn;
+                        const endIndex = startIndex + itemsPerColumn;
+                        const columnCategories = categories.slice(startIndex, endIndex);
+                        const columnTitle = colIndex === 0 
+                          ? (menuConfigs.categories?.column_1_title || 'TRADITIONAL')
+                          : colIndex === 1 
+                          ? (menuConfigs.categories?.column_2_title || 'OCCASIONS')
+                          : (menuConfigs.categories?.column_3_title || 'STYLES');
+                        
+                        return (
+                          <div
+                            key={colIndex}
+                            className={`${colIndex > 0 ? 'px-0' : 'pr-0'} w-full`}
+                          >
+                            <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
+                              {columnTitle}
+                            </h3>
+                            <ul className="space-y-1.5 w-full">
+                              {columnCategories.map((category) => (
+                                <li key={category.id}>
+                                  <Link
+                                    href={`/categories/${category.slug}`}
+                                    className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
+                                    onClick={() => setOpenDropdown(null)}
+                                  >
+                                    {category.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                      <Link
+                        href="/categories"
+                        className="text-sm font-medium text-black hover:underline uppercase tracking-wide text-center block"
+                        onClick={() => setOpenDropdown(null)}
+                      >
+                        VIEW ALL CATEGORIES
+                      </Link>
                     </div>
                   </div>
                 )}

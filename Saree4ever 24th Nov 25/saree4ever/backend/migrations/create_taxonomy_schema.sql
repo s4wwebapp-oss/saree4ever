@@ -148,3 +148,4 @@ COMMENT ON TABLE types IS 'Fabric/weave/construction types (30+ types)';
 COMMENT ON TABLE collections IS 'Curated product collections';
 
 
+

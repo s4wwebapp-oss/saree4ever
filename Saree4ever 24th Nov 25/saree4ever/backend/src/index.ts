@@ -6,6 +6,8 @@ import productRoutes from './routes/products.js';
 import collectionRoutes from './routes/collections.js';
 import categoryRoutes from './routes/categories.js';
 import typeRoutes from './routes/types.js';
+import menuConfigRoutes from './routes/menuConfig.js';
+import uploadRoutes from './routes/upload.js';
 
 // Load environment variables
 dotenv.config();
@@ -50,6 +52,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/types', typeRoutes);
+app.use('/api/menu-config', menuConfigRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

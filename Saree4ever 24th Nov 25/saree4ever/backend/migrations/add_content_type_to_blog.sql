@@ -17,3 +17,4 @@ ON blog_articles (content_type);
 -- Add comment for documentation
 COMMENT ON COLUMN blog_articles.content_type IS 'Type of content: article (text-based), reel (Instagram Reel), or video (YouTube Short/Video)';
 
+

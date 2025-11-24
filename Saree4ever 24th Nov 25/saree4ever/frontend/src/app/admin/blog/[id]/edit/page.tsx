@@ -59,6 +59,7 @@ export default function EditBlogArticlePage() {
     instagram_reel_url: '',
     youtube_short_url: '',
   });
+  const [tagsInput, setTagsInput] = useState<string>('');
 
   useEffect(() => {
     if (!isNew) {
@@ -70,7 +71,9 @@ export default function EditBlogArticlePage() {
     try {
       setLoading(true);
       const response: any = await api.blog.getById(articleId);
-      setArticle(response.article);
+      const data = response.article;
+      setArticle(data);
+      setTagsInput((data.tags || []).join(', '));
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch article');
@@ -92,6 +95,8 @@ export default function EditBlogArticlePage() {
   };
 
   const handleTagsChange = (tagsString: string) => {
+    setTagsInput(tagsString);
+    // Convert to array for storage, but keep input as string for better UX
     const tags = tagsString.split(',').map(t => t.trim()).filter(Boolean);
     setArticle({ ...article, tags });
   };
@@ -301,7 +306,7 @@ export default function EditBlogArticlePage() {
                 </label>
                 <input
                   type="text"
-                  value={article.tags?.join(', ') || ''}
+                  value={tagsInput}
                   onChange={(e) => handleTagsChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black"
                   placeholder="Kanjivaram, Silk, Traditional"

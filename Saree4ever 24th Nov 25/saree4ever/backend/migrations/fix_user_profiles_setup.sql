@@ -173,3 +173,4 @@ BEGIN
   RAISE NOTICE 'Setup complete! Tables and triggers are ready.';
 END $$;
 
+

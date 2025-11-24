@@ -249,3 +249,4 @@ GET /api/products/{slug}
 - [ ] Search faceting by collections/categories/types
 
 
+

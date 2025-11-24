@@ -53,6 +53,7 @@ export default function NewBlogArticlePage() {
     instagram_reel_url: '',
     youtube_short_url: '',
   });
+  const [tagsInput, setTagsInput] = useState<string>('');
 
   const generateSlug = (title: string) => {
     return title
@@ -66,6 +67,8 @@ export default function NewBlogArticlePage() {
   };
 
   const handleTagsChange = (tagsString: string) => {
+    setTagsInput(tagsString);
+    // Convert to array for storage, but keep input as string for better UX
     const tags = tagsString.split(',').map(t => t.trim()).filter(Boolean);
     setArticle({ ...article, tags });
   };
@@ -260,7 +263,7 @@ export default function NewBlogArticlePage() {
                 </label>
                 <input
                   type="text"
-                  value={article.tags?.join(', ') || ''}
+                  value={tagsInput}
                   onChange={(e) => handleTagsChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black"
                   placeholder="Kanjivaram, Silk, Traditional"

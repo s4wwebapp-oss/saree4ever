@@ -40,7 +40,13 @@ export default function AdminBlogPage() {
         params.search = searchQuery;
       }
       const response: any = await api.blog.getAllAdmin(params);
-      setArticles(response.articles || []);
+      // Filter to only show articles (exclude reels and videos)
+      const allContent = response.articles || [];
+      const articlesOnly = allContent.filter((item: any) => 
+        item.content_type === 'article' || 
+        (!item.content_type && !item.instagram_reel_url && !item.youtube_short_url)
+      );
+      setArticles(articlesOnly);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch articles');

@@ -21,20 +21,76 @@ interface HeroCarouselProps {
 export default function HeroCarousel({ slides }: HeroCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auto-advance slides every 5 seconds
   useEffect(() => {
-    if (!isAutoPlaying || slides.length <= 1) return;
+    if (!mounted || !isAutoPlaying || slides.length <= 1) return;
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, slides.length]);
+  }, [mounted, isAutoPlaying, slides.length]);
 
   if (!slides || slides.length === 0) {
     return null;
+  }
+
+  // Render static version during SSR to match initial client render
+  if (!mounted) {
+    return (
+      <section className="relative w-full h-[60vh] md:h-[80vh] bg-black overflow-hidden">
+        <div className="relative w-full h-full">
+          {slides[0] && (
+            <div className="absolute inset-0 opacity-100 z-10">
+              <div className="relative w-full h-full">
+                <Image
+                  src={slides[0].image_url}
+                  alt={slides[0].title || 'Hero slide'}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="100vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-white px-4 max-w-4xl mx-auto z-20">
+                    {slides[0].title && (
+                      <h1 className="heading-serif text-white mb-6">
+                        {slides[0].title}
+                      </h1>
+                    )}
+                    {slides[0].subtitle && (
+                      <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
+                        {slides[0].subtitle}
+                      </p>
+                    )}
+                    {slides[0].button_text && slides[0].button_link && (
+                      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link
+                          href={slides[0].button_link}
+                          target={slides[0].button_target || '_self'}
+                          className="btn-primary"
+                        >
+                          {slides[0].button_text}
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    );
   }
 
   const goToSlide = (index: number) => {

@@ -100,3 +100,4 @@ export default function TypeProductsClient({ typeSlug }: { typeSlug: string }) {
 }
 
 
+

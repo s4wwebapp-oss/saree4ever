@@ -18,3 +18,4 @@ WHERE instagram_reel_url IS NOT NULL OR youtube_short_url IS NOT NULL;
 COMMENT ON COLUMN blog_articles.instagram_reel_url IS 'URL to Instagram Reel (e.g., https://www.instagram.com/reel/ABC123/)';
 COMMENT ON COLUMN blog_articles.youtube_short_url IS 'URL to YouTube Short (e.g., https://www.youtube.com/shorts/ABC123)';
 
+

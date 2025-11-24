@@ -166,3 +166,4 @@ LIMIT 10;
 ✅ Quantity selector respects available stock limit
 ✅ "Add to Cart" button state matches stock availability
 
+

@@ -88,3 +88,4 @@ COMMENT ON TABLE product_categories IS 'Many-to-many relationship: Products can 
 COMMENT ON TABLE product_types IS 'Many-to-many relationship: Products can belong to multiple types';
 
 
+

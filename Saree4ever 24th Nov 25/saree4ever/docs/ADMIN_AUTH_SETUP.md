@@ -305,3 +305,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 - `ADMIN_FEATURES_COMPLETE.md` - Full admin features guide
 - `ADMIN_WIRING_SUMMARY.md` - Admin setup summary
 
+

@@ -133,6 +133,47 @@ export default async function HomePage() {
       {/* Hero Section */}
       <HeroCarousel slides={heroSlides} />
 
+      {/* Featured Products */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-12">
+          <h2 className="heading-serif-md mb-4">Featured Products</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Handpicked sarees from our collection, each one a masterpiece of craftsmanship
+          </p>
+        </div>
+
+        {featuredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                slug={product.slug}
+                name={product.name}
+                image={product.primary_image_url}
+                price={product.base_price}
+                compareAtPrice={product.compare_at_price}
+                collection={product.collection?.name}
+                collections={product.collections}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No featured products available at the moment.</p>
+            <Link href="/products" className="btn-primary mt-4 inline-block">
+              Browse All Products
+            </Link>
+          </div>
+        )}
+
+        <div className="text-center mt-12">
+          <Link href="/products" className="btn-outline">
+            View All Products
+          </Link>
+        </div>
+      </section>
+
       {/* Collections Showcase */}
       {collections.length > 0 && (
         <section className="bg-gray-50 py-16">
@@ -177,47 +218,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="heading-serif-md mb-4">Featured Products</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Handpicked sarees from our collection, each one a masterpiece of craftsmanship
-          </p>
-        </div>
-
-        {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                slug={product.slug}
-                name={product.name}
-                image={product.primary_image_url}
-                price={product.base_price}
-                compareAtPrice={product.compare_at_price}
-                collection={product.collection?.name}
-                collections={product.collections}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-600">No featured products available at the moment.</p>
-            <Link href="/products" className="btn-primary mt-4 inline-block">
-              Browse All Products
-            </Link>
-          </div>
-        )}
-
-        <div className="text-center mt-12">
-          <Link href="/products" className="btn-outline">
-            View All Products
-          </Link>
-        </div>
-      </section>
 
       {/* Why Choose Us Section */}
       <section className="bg-black text-white py-16">

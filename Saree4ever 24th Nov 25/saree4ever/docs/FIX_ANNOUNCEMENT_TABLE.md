@@ -161,3 +161,4 @@ After running the migration:
 
 Run the migration SQL in Supabase and the error will be fixed!
 
+

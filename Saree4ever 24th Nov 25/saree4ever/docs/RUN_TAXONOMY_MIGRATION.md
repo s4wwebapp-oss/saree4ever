@@ -114,3 +114,4 @@ ALTER TABLE categories DROP COLUMN IF EXISTS icon;
 **Status:** Migration SQL created. Ready to be executed.
 
 
+

@@ -346,6 +346,14 @@ export const api = {
     getImports: () => get('/csv-import/history'),
   },
 
+  // Menu Config
+  menuConfig: {
+    getAll: () => get('/menu-config'),
+    getByType: (menuType: string) => get(`/menu-config/${menuType}`),
+    update: (menuType: string, data: { column_1_title: string; column_2_title: string; column_3_title: string }) =>
+      put(`/menu-config/${menuType}`, data),
+  },
+
   // Blog
   blog: {
     getAll: (params?: { limit?: number; offset?: number; category?: string; featured?: boolean; search?: string }) => {

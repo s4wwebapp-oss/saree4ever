@@ -87,10 +87,15 @@ exports.createArticle = async (articleData) => {
     is_featured = false,
     instagram_reel_url,
     youtube_short_url,
+    content_type = 'article',
   } = articleData;
 
-  if (!title || !slug || !content) {
-    throw new Error('Title, slug, and content are required');
+  // For articles, content is required. For reels/videos, either instagram_reel_url or youtube_short_url is required
+  if (content_type === 'article' && (!title || !slug || !content)) {
+    throw new Error('Title, slug, and content are required for articles');
+  }
+  if ((content_type === 'reel' || content_type === 'video') && (!title || !slug || (!instagram_reel_url && !youtube_short_url))) {
+    throw new Error(`Title, slug, and ${content_type === 'reel' ? 'Instagram Reel URL' : 'YouTube Video URL'} are required`);
   }
 
   const { data, error } = await supabase
@@ -99,7 +104,7 @@ exports.createArticle = async (articleData) => {
       title,
       slug,
       excerpt: excerpt || null,
-      content,
+      content: content || '',
       featured_image_url: featured_image_url || null,
       author_id: author_id || null,
       author_name: author_name || null,
@@ -112,6 +117,7 @@ exports.createArticle = async (articleData) => {
       is_featured,
       instagram_reel_url: instagram_reel_url || null,
       youtube_short_url: youtube_short_url || null,
+      content_type: content_type || 'article',
     })
     .select()
     .single();
@@ -149,6 +155,7 @@ exports.updateArticle = async (id, articleData) => {
   if (articleData.is_featured !== undefined) updateData.is_featured = articleData.is_featured;
   if (articleData.instagram_reel_url !== undefined) updateData.instagram_reel_url = articleData.instagram_reel_url || null;
   if (articleData.youtube_short_url !== undefined) updateData.youtube_short_url = articleData.youtube_short_url || null;
+  if (articleData.content_type !== undefined) updateData.content_type = articleData.content_type;
 
   const { data, error } = await supabase
     .from('blog_articles')

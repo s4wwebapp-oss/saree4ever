@@ -79,3 +79,4 @@ CREATE POLICY "Admins can manage hero slides"
   ON hero_slides FOR ALL
   USING (auth.role() = 'authenticated');
 
+

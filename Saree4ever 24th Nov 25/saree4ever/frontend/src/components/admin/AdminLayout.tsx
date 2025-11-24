@@ -15,6 +15,7 @@ const navItems = [
   { name: 'Types', href: '/admin/types', icon: '🧵' },
   { name: 'Categories', href: '/admin/categories', icon: '🏷️' },
   { name: 'Collections', href: '/admin/collections', icon: '📁' },
+  { name: 'Menu Config', href: '/admin/menu-config', icon: '📋' },
   { name: 'Hero Slides', href: '/admin/hero-slides', icon: '🖼️' },
   { name: 'Announcement', href: '/admin/announcement', icon: '📢' },
   { name: 'Blog/Stories', href: '/admin/blog', icon: '📝' },

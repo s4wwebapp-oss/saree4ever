@@ -294,3 +294,4 @@ ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
 
 If you still get errors after running the fix script, share the exact error message and I'll help debug further!
 
+

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
 import Image from 'next/image';
+import { validateImageFile } from '@/lib/storage';
 
 interface HeroSlide {
   id: string;
@@ -33,6 +34,9 @@ export default function AdminHeroSlidesPage() {
     display_order: 0,
     is_active: false,
   });
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchSlides();
@@ -91,6 +95,64 @@ export default function AdminHeroSlidesPage() {
       display_order: 0,
       is_active: false,
     });
+    setUploadError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+
+    // Validate file
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setUploadError(validation.error || 'Invalid file');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      
+      // Get auth token
+      const token = localStorage.getItem('token') || localStorage.getItem('admin_token');
+      if (!token) {
+        throw new Error('Not authenticated. Please login again.');
+      }
+
+      // Upload via backend API (uses service role, bypasses RLS)
+      const formData = new FormData();
+      formData.append('image', file);
+      const slideId = editingId && editingId !== 'new' ? editingId : undefined;
+      if (slideId) {
+        formData.append('slideId', slideId);
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/upload/hero-slide`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
+
+      const data = await response.json();
+      setFormData({ ...formData, image_url: data.url });
+      setUploadError(null);
+    } catch (err: any) {
+      setUploadError(err.message || 'Failed to upload image');
+      console.error('Error uploading image:', err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -221,26 +283,87 @@ export default function AdminHeroSlidesPage() {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL *
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image *
                 </label>
-                <input
-                  type="url"
-                  value={formData.image_url || ''}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black"
-                  placeholder="https://example.com/image.jpg"
-                />
-                {formData.image_url && (
-                  <div className="mt-2 relative w-full h-48 bg-gray-100 rounded overflow-hidden">
-                    <Image
-                      src={formData.image_url}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
-                      onError={() => {}}
+                
+                {/* Upload Option */}
+                <div className="mb-4">
+                  <label className="block text-xs font-medium text-gray-600 mb-2">
+                    Upload Image (Recommended)
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                      onChange={handleFileSelect}
+                      disabled={uploading}
+                      className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-black file:text-white
+                        hover:file:bg-gray-800
+                        file:cursor-pointer
+                        disabled:opacity-50 disabled:cursor-not-allowed"
                     />
+                    {uploading && (
+                      <span className="text-sm text-gray-600">Uploading...</span>
+                    )}
+                  </div>
+                  {uploadError && (
+                    <p className="mt-2 text-sm text-red-600">{uploadError}</p>
+                  )}
+                  <p className="mt-1 text-xs text-gray-500">
+                    Supported formats: JPEG, PNG, WebP, GIF (Max 10MB)
+                  </p>
+                </div>
+
+                {/* OR Divider */}
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">OR</span>
+                  </div>
+                </div>
+
+                {/* URL Option */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-2">
+                    Enter Image URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.image_url || ''}
+                    onChange={(e) => {
+                      setFormData({ ...formData, image_url: e.target.value });
+                      setUploadError(null);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+
+                {/* Preview */}
+                {formData.image_url && (
+                  <div className="mt-4">
+                    <label className="block text-xs font-medium text-gray-600 mb-2">
+                      Preview
+                    </label>
+                    <div className="relative w-full h-48 bg-gray-100 rounded overflow-hidden border border-gray-200">
+                      <Image
+                        src={formData.image_url}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                        onError={() => {
+                          setUploadError('Failed to load image. Please check the URL.');
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -367,13 +490,21 @@ export default function AdminHeroSlidesPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {activeSlides.slice(0, 3).map((slide, index) => (
                 <div key={slide.id} className="relative aspect-[16/9] bg-gray-100 rounded overflow-hidden">
-                  <Image
-                    src={slide.image_url}
-                    alt={slide.title || `Slide ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
+                  {slide.image_url ? (
+                    <>
+                      <Image
+                        src={slide.image_url}
+                        alt={slide.title || `Slide ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-400">
+                      No Image
+                    </div>
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                     <p className="text-sm font-semibold mb-1">{slide.title || 'No title'}</p>
                     <p className="text-xs opacity-90">{slide.subtitle || 'No subtitle'}</p>
@@ -448,12 +579,18 @@ export default function AdminHeroSlidesPage() {
                     <tr key={slide.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="relative w-24 h-16 bg-gray-100 rounded overflow-hidden">
-                          <Image
-                            src={slide.image_url}
-                            alt={slide.title || 'Slide'}
-                            fill
-                            className="object-cover"
-                          />
+                          {slide.image_url ? (
+                            <Image
+                              src={slide.image_url}
+                              alt={slide.title || 'Slide'}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                              No Image
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
