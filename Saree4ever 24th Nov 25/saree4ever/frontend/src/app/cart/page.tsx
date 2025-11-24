@@ -51,8 +51,8 @@ export default function CartPage() {
 
   const allValid = Object.values(validatedItems).every((v) => v);
   const subtotal = total;
-  const shipping = 0; // Free shipping or calculate
-  const tax = subtotal * 0.18; // 18% GST
+  const shipping: number = 0; // Free shipping or calculate
+  const tax: number = subtotal * 0.18; // 18% GST
   const finalTotal = subtotal + shipping + tax;
 
   return (
