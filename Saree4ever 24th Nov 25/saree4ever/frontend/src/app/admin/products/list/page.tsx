@@ -305,7 +305,17 @@ export default function ProductsListPage() {
           </div>
           <div className="flex items-end">
             <button
-              onClick={() => setFilters({ active: 'true' })}
+              onClick={() => setFilters({
+                search: '',
+                collection: '',
+                type: '',
+                category: '',
+                featured: '',
+                active: 'true',
+                minPrice: '',
+                maxPrice: '',
+                sortBy: 'newest',
+              })}
               className="btn-outline text-sm w-full"
             >
               Clear Filters
