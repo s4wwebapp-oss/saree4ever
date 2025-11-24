@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import FiltersSidebarEnhanced from '@/components/FiltersSidebarEnhanced';
 import AllProductsClient from './AllProductsClient';
+import { Suspense } from 'react';
 
 interface Product {
   id: string;
@@ -60,7 +61,9 @@ export default async function AllProductsPage({
           <p className="text-gray-600">{products.length} products</p>
         </div>
 
-        <AllProductsClient initialProducts={products} initialSearchParams={params} />
+        <Suspense fallback={<div className="text-center py-12">Loading products...</div>}>
+          <AllProductsClient initialProducts={products} initialSearchParams={params} />
+        </Suspense>
       </div>
     </div>
   );

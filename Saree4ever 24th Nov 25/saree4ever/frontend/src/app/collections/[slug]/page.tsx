@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import FiltersSidebarEnhanced from '@/components/FiltersSidebarEnhanced';
 import CollectionProductsClient from './CollectionProductsClient';
+import { Suspense } from 'react';
 
 interface Product {
   id: string;
@@ -63,7 +64,9 @@ export default async function CollectionProductsPage({
           <p className="text-gray-600">{products.length} products</p>
         </div>
 
-        <CollectionProductsClient collectionSlug={slug} />
+        <Suspense fallback={<div className="text-center py-12">Loading products...</div>}>
+          <CollectionProductsClient collectionSlug={slug} />
+        </Suspense>
       </div>
     </div>
   );

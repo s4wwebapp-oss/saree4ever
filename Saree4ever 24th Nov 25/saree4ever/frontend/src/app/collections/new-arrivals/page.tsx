@@ -1,6 +1,7 @@
 import { api } from '@/lib/api';
 import CollectionProductsClient from '../[slug]/CollectionProductsClient';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 export default async function NewArrivalsPage() {
   // Fetch products that are in the "new-arrivals" collection or recently added
@@ -30,7 +31,9 @@ export default async function NewArrivalsPage() {
         </div>
 
         {/* Products with Filters */}
-        <CollectionProductsClient collectionSlug={collectionSlug} />
+        <Suspense fallback={<div className="text-center py-12">Loading products...</div>}>
+          <CollectionProductsClient collectionSlug={collectionSlug} />
+        </Suspense>
       </div>
     </div>
   );

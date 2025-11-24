@@ -3,6 +3,7 @@ import ProductCard from '@/components/ProductCard';
 import FiltersSidebarEnhanced from '@/components/FiltersSidebarEnhanced';
 import TypeProductsClient from './TypeProductsClient';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 interface Type {
   id: string;
@@ -86,7 +87,9 @@ export default async function TypePage({
         </div>
 
         {/* Products with Filters */}
-        <TypeProductsClient typeSlug={slug} />
+        <Suspense fallback={<div className="text-center py-12">Loading products...</div>}>
+          <TypeProductsClient typeSlug={slug} />
+        </Suspense>
       </div>
     </div>
   );

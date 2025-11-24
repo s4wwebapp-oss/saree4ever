@@ -3,6 +3,7 @@ import ProductCard from '@/components/ProductCard';
 import FiltersSidebarEnhanced from '@/components/FiltersSidebarEnhanced';
 import CategoryProductsClient from './CategoryProductsClient';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 interface Category {
   id: string;
@@ -86,7 +87,9 @@ export default async function CategoryPage({
         </div>
 
         {/* Products with Filters */}
-        <CategoryProductsClient categorySlug={slug} />
+        <Suspense fallback={<div className="text-center py-12">Loading products...</div>}>
+          <CategoryProductsClient categorySlug={slug} />
+        </Suspense>
       </div>
     </div>
   );
