@@ -21,6 +21,7 @@ const blogRoutes = require('./routes/blog');
 const announcementRoutes = require('./routes/announcement');
 const heroSlideRoutes = require('./routes/hero-slides');
 const testimonialRoutes = require('./routes/testimonials');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -89,6 +90,7 @@ app.get('/api', (req, res) => {
       announcement: '/api/announcement',
       heroSlides: '/api/hero-slides',
       testimonials: '/api/testimonials',
+      upload: '/api/upload',
       auth: '/api/auth',
     },
   });
@@ -112,6 +114,7 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/hero-slides', heroSlideRoutes);
 app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 handler
 app.use((req, res) => {
