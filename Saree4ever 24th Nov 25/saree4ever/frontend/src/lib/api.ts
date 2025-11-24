@@ -24,14 +24,28 @@ async function fetchAPI<T>(
       ? new AbortController()
       : undefined;
 
-  const headers: HeadersInit = {
-    ...(options.headers || {}),
-  };
+  // Convert headers to a record for easier manipulation
+  const headersRecord: Record<string, string> = {};
+  
+  // Copy existing headers
+  if (options.headers) {
+    if (options.headers instanceof Headers) {
+      options.headers.forEach((value, key) => {
+        headersRecord[key] = value;
+      });
+    } else if (Array.isArray(options.headers)) {
+      options.headers.forEach(([key, value]) => {
+        headersRecord[key] = value;
+      });
+    } else {
+      Object.assign(headersRecord, options.headers);
+    }
+  }
 
   // Only set JSON content-type when body isn't FormData
   const isFormData = options.body instanceof FormData;
-  if (!isFormData && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
+  if (!isFormData && !headersRecord['Content-Type']) {
+    headersRecord['Content-Type'] = 'application/json';
   }
 
   // Attach auth token if running in browser
@@ -40,9 +54,11 @@ async function fetchAPI<T>(
     const token = localStorage.getItem('token') || localStorage.getItem('admin_token');
     
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headersRecord['Authorization'] = `Bearer ${token}`;
     }
   }
+
+  const headers: HeadersInit = headersRecord;
 
   const config: RequestInit = {
     ...options,
