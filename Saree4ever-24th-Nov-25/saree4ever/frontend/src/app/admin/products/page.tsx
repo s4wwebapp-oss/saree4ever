@@ -89,6 +89,7 @@ export default function AdminProductsPage() {
     is_featured: false,
     is_active: true,
   });
+  const [subcategoriesInput, setSubcategoriesInput] = useState<string>('');
 
   // Load collections, categories, and types
   useEffect(() => {
@@ -185,6 +186,7 @@ export default function AdminProductsPage() {
         is_featured: false,
         is_active: true,
       });
+      setSubcategoriesInput('');
 
       // Optionally redirect to product page
       // router.push(`/product/${response.slug}`);
@@ -661,9 +663,22 @@ export default function AdminProductsPage() {
               <p className="text-xs text-gray-600 mb-2">Enter subcategories separated by commas (e.g., Pure Silk, Handloom)</p>
               <input
                 type="text"
-                value={formData.subcategories.join(', ')}
+                value={subcategoriesInput}
                 onChange={(e) => {
-                  const subcats = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                  // Allow free typing - don't parse immediately
+                  const inputValue = e.target.value;
+                  setSubcategoriesInput(inputValue);
+                }}
+                onBlur={(e) => {
+                  // Parse and update formData only when user finishes typing (on blur)
+                  const inputValue = e.target.value;
+                  const subcats = inputValue
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0);
+                  // Update both the input display and formData
+                  const formattedValue = subcats.join(', ');
+                  setSubcategoriesInput(formattedValue);
                   setFormData({ ...formData, subcategories: subcats });
                 }}
                 className="input-field"

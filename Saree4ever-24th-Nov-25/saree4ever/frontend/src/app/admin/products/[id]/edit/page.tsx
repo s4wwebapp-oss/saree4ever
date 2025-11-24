@@ -64,6 +64,7 @@ export default function EditProductPage() {
   const [formData, setFormData] = useState<Product | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [subcategoriesInput, setSubcategoriesInput] = useState<string>('');
 
   // Load product and options
   useEffect(() => {
@@ -89,6 +90,8 @@ export default function EditProductPage() {
       };
       
       setFormData(productData);
+      // Initialize subcategories input with formatted string
+      setSubcategoriesInput((product.subcategories || []).join(', '));
     } catch (error: any) {
       console.error('Failed to load product:', error);
       setError('Failed to load product: ' + (error.message || 'Unknown error'));
@@ -466,10 +469,25 @@ export default function EditProductPage() {
             <p className="text-xs text-gray-600 mb-2">Enter subcategories separated by commas (e.g., Pure Silk, Handloom)</p>
             <input
               type="text"
-              value={(formData.subcategories || []).join(', ')}
+              value={subcategoriesInput}
               onChange={(e) => {
-                const subcats = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                setFormData({ ...formData, subcategories: subcats });
+                // Allow free typing - don't parse immediately
+                const inputValue = e.target.value;
+                setSubcategoriesInput(inputValue);
+              }}
+              onBlur={(e) => {
+                // Parse and update formData only when user finishes typing (on blur)
+                const inputValue = e.target.value;
+                const subcats = inputValue
+                  .split(',')
+                  .map(s => s.trim())
+                  .filter(s => s.length > 0);
+                // Update both the input display and formData
+                const formattedValue = subcats.join(', ');
+                setSubcategoriesInput(formattedValue);
+                if (formData) {
+                  setFormData({ ...formData, subcategories: subcats });
+                }
               }}
               className="input-field"
               placeholder="Pure Silk, Handloom, Designer"
