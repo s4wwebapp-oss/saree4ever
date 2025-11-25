@@ -3,6 +3,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ProductVariantSelector from '@/components/ProductVariantSelector';
 import ProductImageGallery from '@/components/ProductImageGallery';
+import ProductHighlights from '@/components/ProductHighlights';
+import ProductDeliveryInfo from '@/components/ProductDeliveryInfo';
+import ProductTabs from '@/components/ProductTabs';
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
@@ -198,7 +201,25 @@ export default async function ProductDetailPage({
             </div>
 
             {/* Product Title */}
-            <h1 className="heading-serif-md mb-4">{product.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-3">{product.name}</h1>
+
+            {/* Ratings (Mock - can be replaced with real ratings) */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="ml-2 text-sm font-medium text-gray-700">4.5</span>
+              </div>
+              <span className="text-gray-400">|</span>
+              <span className="text-sm text-blue-600 hover:underline cursor-pointer">2,345 ratings</span>
+              <span className="text-gray-400">|</span>
+              <span className="text-sm text-blue-600 hover:underline cursor-pointer">1,234 reviews</span>
+            </div>
 
             {/* Price Section */}
             <div className="mb-6 pb-6 border-b border-gray-200">
@@ -235,74 +256,65 @@ export default async function ProductDetailPage({
               )}
             </div>
 
-            {/* Short Description */}
+            {/* Product Highlights */}
             {product.description && (
-              <div className="mb-6">
-                <p className="text-gray-700 leading-relaxed">{product.description}</p>
-              </div>
+              <ProductHighlights
+                highlights={[
+                  product.description,
+                  product.weave ? `Handwoven ${product.weave} weave` : 'Handwoven by skilled artisans',
+                  product.length_m ? `${product.length_m}m length` : 'Standard 6m length',
+                  product.blouse_included ? 'Blouse piece included' : 'Blouse piece available separately',
+                  '100% Authentic',
+                  'Free shipping worldwide',
+                ]}
+              />
             )}
 
             {/* Variant Selector */}
-            <div className="mb-8">
+            <div className="mb-6">
               <ProductVariantSelector product={product} variants={product.variants || []} />
             </div>
 
-            {/* Product Specifications */}
-            {(product.weave || product.length_m !== null || product.color || product.subcategories?.length) && (
-              <div className="mb-8 pt-6 border-t border-gray-200">
-                <h3 className="font-semibold mb-4">Product Details</h3>
-                <dl className="grid grid-cols-2 gap-4 text-sm">
-                  {product.weave && (
-                    <>
-                      <dt className="text-gray-600">Weave</dt>
-                      <dd className="font-medium">{product.weave}</dd>
-                    </>
-                  )}
-                  {product.length_m !== null && (
-                    <>
-                      <dt className="text-gray-600">Length</dt>
-                      <dd className="font-medium">{product.length_m}m</dd>
-                    </>
-                  )}
-                  {product.color && (
-                    <>
-                      <dt className="text-gray-600">Color</dt>
-                      <dd className="font-medium">{product.color}</dd>
-                    </>
-                  )}
-                  {product.blouse_included && (
-                    <>
-                      <dt className="text-gray-600">Blouse</dt>
-                      <dd className="font-medium">Included</dd>
-                    </>
-                  )}
-                  {product.subcategories && product.subcategories.length > 0 && (
-                    <>
-                      <dt className="text-gray-600">Subcategories</dt>
-                      <dd className="font-medium">{product.subcategories.join(', ')}</dd>
-                    </>
-                  )}
-                  {product.sku && (
-                    <>
-                      <dt className="text-gray-600">SKU</dt>
-                      <dd className="font-medium">{product.sku}</dd>
-                    </>
-                  )}
-                </dl>
-              </div>
-            )}
+            {/* Delivery Information */}
+            <div className="mb-6">
+              <ProductDeliveryInfo />
+            </div>
 
-            {/* Long Description */}
-            {product.long_description && (
-              <div className="pt-8 border-t border-gray-200">
-                <h2 className="font-semibold text-lg mb-4">Description</h2>
-                <div
-                  className="prose prose-sm max-w-none text-gray-700"
-                  dangerouslySetInnerHTML={{ __html: product.long_description }}
-                />
-              </div>
-            )}
+            {/* Share and Wishlist Buttons */}
+            <div className="flex gap-3 mb-6 pt-6 border-t border-gray-200">
+              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span className="text-sm">Share</span>
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span className="text-sm">Wishlist</span>
+              </button>
+            </div>
           </div>
+        </div>
+
+        {/* Product Tabs Section */}
+        <div className="mt-12">
+          <ProductTabs
+            description={product.description}
+            longDescription={product.long_description}
+            specifications={{
+              'Weave': product.weave || 'N/A',
+              'Length': product.length_m ? `${product.length_m}m` : 'Standard 6m',
+              'Color': product.color || 'Multiple colors available',
+              'Blouse': product.blouse_included ? 'Included' : 'Available separately',
+              'Subcategories': product.subcategories?.join(', ') || 'N/A',
+              'SKU': product.sku || 'N/A',
+              'Material': 'Pure Silk',
+              'Care Instructions': 'Dry clean only',
+            }}
+            reviews={[]}
+          />
         </div>
 
         {/* Related Products */}
