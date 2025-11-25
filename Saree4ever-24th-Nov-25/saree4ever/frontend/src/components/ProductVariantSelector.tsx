@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { api } from '@/lib/api';
 
@@ -42,6 +43,7 @@ export default function ProductVariantSelector({
   const [availableStock, setAvailableStock] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const { addItem } = useCart();
+  const router = useRouter();
 
   // Get unique colors from variants (handle undefined/null)
   const safeVariants = variants || [];
@@ -100,6 +102,29 @@ export default function ProductVariantSelector({
 
     // Show success message (you can add a toast notification here)
     alert('Added to cart!');
+  };
+
+  const handleBuyNow = () => {
+    if (!selectedVariant || !availableStock || availableStock < quantity) {
+      return;
+    }
+
+    const price = selectedVariant.price || product.base_price || 0;
+    // Add item to cart first
+    addItem({
+      variantId: selectedVariant.id,
+      productId: product.id,
+      quantity,
+      price,
+      image: selectedVariant.image_url || product.primary_image_url || '',
+      title: product.name,
+      variantName: selectedVariant.name,
+      color: selectedVariant.color || undefined,
+      hasBlouse: selectedVariant.blouse_included,
+    });
+
+    // Redirect to checkout
+    router.push('/checkout');
   };
 
   // If no variants, use product base price
@@ -214,18 +239,31 @@ export default function ProductVariantSelector({
             </div>
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            disabled={!canAddToCart}
-            className={`w-full py-3 font-medium ${
-              canAddToCart
-                ? 'btn-primary'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={handleAddToCart}
+              disabled={!canAddToCart}
+              className={`flex-1 py-3 font-medium ${
+                canAddToCart
+                  ? 'btn-outline border-2 border-black hover:bg-black hover:text-white transition-colors'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={!canAddToCart}
+              className={`flex-1 py-3 font-medium ${
+                canAddToCart
+                  ? 'btn-primary'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isOutOfStock ? 'Out of Stock' : 'Buy Now'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -271,26 +309,47 @@ export default function ProductVariantSelector({
             </div>
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={() => {
-              if (product.base_price) {
-                addItem({
-                  variantId: product.id, // Use product ID as variant ID for products without variants
-                  productId: product.id,
-                  quantity,
-                  price: product.base_price,
-                  image: product.primary_image_url || '',
-                  title: product.name,
-                  variantName: product.name,
-                });
-                alert('Added to cart!');
-              }
-            }}
-            className="w-full py-3 font-medium btn-primary"
-          >
-            Add to Cart
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                if (product.base_price) {
+                  addItem({
+                    variantId: product.id, // Use product ID as variant ID for products without variants
+                    productId: product.id,
+                    quantity,
+                    price: product.base_price,
+                    image: product.primary_image_url || '',
+                    title: product.name,
+                    variantName: product.name,
+                  });
+                  alert('Added to cart!');
+                }
+              }}
+              className="flex-1 py-3 font-medium btn-outline border-2 border-black hover:bg-black hover:text-white transition-colors"
+            >
+              Add to Cart
+            </button>
+            <button
+              onClick={() => {
+                if (product.base_price) {
+                  addItem({
+                    variantId: product.id,
+                    productId: product.id,
+                    quantity,
+                    price: product.base_price,
+                    image: product.primary_image_url || '',
+                    title: product.name,
+                    variantName: product.name,
+                  });
+                  router.push('/checkout');
+                }
+              }}
+              className="flex-1 py-3 font-medium btn-primary"
+            >
+              Buy Now
+            </button>
+          </div>
         </div>
       )}
       
