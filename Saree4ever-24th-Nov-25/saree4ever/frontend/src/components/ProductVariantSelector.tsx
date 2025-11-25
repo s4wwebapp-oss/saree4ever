@@ -23,6 +23,7 @@ interface Product {
   name: string;
   primary_image_url: string | null;
   base_price: number | null | undefined;
+  compare_at_price: number | null | undefined;
 }
 
 interface ProductVariantSelectorProps {

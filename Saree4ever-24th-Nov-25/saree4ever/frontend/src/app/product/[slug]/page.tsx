@@ -59,25 +59,12 @@ interface Product {
 
 async function getProduct(slug: string): Promise<Product | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
-    const response = await fetch(`${apiUrl}/products/${slug}`, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
-    });
-    
-    if (!response.ok) {
-      console.error(`Failed to fetch product: ${response.status} ${response.statusText}`);
-      return null;
-    }
-    
-    const data = await response.json();
-    console.log('Product API Response:', JSON.stringify(data, null, 2));
+    const response = await api.products.getBySlug(slug);
     
     // Handle both { product: {...} } and direct product object
-    const product = (data as { product?: Product }).product || (data as Product);
+    const product = (response as { product?: Product }).product || (response as Product);
     
     if (!product || !product.id) {
-      console.error('Invalid product data received:', data);
       return null;
     }
     
@@ -89,9 +76,9 @@ async function getProduct(slug: string): Promise<Product | null> {
 }
 
 async function getRelatedProducts(
+  currentProductId: string,
   collectionId?: string,
-  categoryId?: string,
-  currentProductId: string
+  categoryId?: string
 ): Promise<Product[]> {
   try {
     const products = await api.products.getAll();
@@ -122,21 +109,17 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  console.log('Fetching product with slug:', slug);
   const product = await getProduct(slug);
 
   if (!product) {
-    console.error('Product not found for slug:', slug);
     notFound();
   }
-  
-  console.log('Product loaded:', product.name, 'Images:', product.primary_image_url);
 
   // Get related products
   const relatedProducts = await getRelatedProducts(
+    product.id,
     product.collection?.id,
-    product.category?.id,
-    product.id
+    product.category?.id
   );
 
   // Safely handle image_urls - ensure it's always an array
@@ -146,10 +129,6 @@ export default async function ProductDetailPage({
   const images = product.primary_image_url
     ? [product.primary_image_url, ...imageUrls].filter(Boolean)
     : imageUrls.filter(Boolean);
-  
-  console.log('Product images array:', images);
-  console.log('Product base_price:', product.base_price);
-  console.log('Product variants:', product.variants?.length || 0);
 
   // Calculate discount percentage
   const discountPercent = product.compare_at_price && product.base_price
