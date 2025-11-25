@@ -136,6 +136,12 @@ export default function ProductVariantSelector({
   const canAddToCart = hasVariants 
     ? (selectedVariant && availableStock !== null && availableStock >= quantity)
     : (product.base_price && product.base_price > 0);
+  
+  // Show buttons even if no variant selected but product has base price
+  const showButtonsForNoVariants = !hasVariants && product.base_price && product.base_price > 0;
+
+  // Always show buttons section at the bottom
+  const showActionButtons = selectedVariant || showButtonsForNoVariants;
 
   return (
     <div className="space-y-6">
@@ -268,7 +274,24 @@ export default function ProductVariantSelector({
       )}
 
       {!selectedVariant && hasVariants && (
-        <p className="text-sm text-gray-600">Please select a color to continue</p>
+        <div className="border-t border-gray-200 pt-4">
+          <p className="text-sm text-gray-600 mb-4">Please select a color to continue</p>
+          {/* Show disabled buttons as placeholder */}
+          <div className="flex gap-3">
+            <button
+              disabled
+              className="flex-1 py-3 font-medium bg-gray-300 text-gray-500 cursor-not-allowed"
+            >
+              Add to Cart
+            </button>
+            <button
+              disabled
+              className="flex-1 py-3 font-medium bg-gray-300 text-gray-500 cursor-not-allowed"
+            >
+              Buy Now
+            </button>
+          </div>
+        </div>
       )}
       
       {/* Show add to cart for products without variants */}
