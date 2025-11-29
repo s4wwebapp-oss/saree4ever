@@ -12,6 +12,10 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    if (!phone || phone.trim() === '') {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
     // Sign up with Supabase
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -31,7 +35,7 @@ exports.signup = async (req, res) => {
       await supabase.from('user_profiles').insert({
         id: data.user.id,
         full_name: full_name || null,
-        phone: phone || null,
+        phone: phone.trim(),
       });
     }
 

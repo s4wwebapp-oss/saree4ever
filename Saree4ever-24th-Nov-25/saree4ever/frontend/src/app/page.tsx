@@ -3,6 +3,8 @@ import Image from 'next/image';
 import { api } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 import HeroCarousel from '@/components/HeroCarousel';
+import ExpandableCategoryGrid from '@/components/ExpandableCategoryGrid';
+import ReelsSection from '@/components/ReelsSection';
 
 interface Product {
   id: string;
@@ -29,14 +31,6 @@ interface HeroSlide {
   button_text: string | null;
   button_link: string | null;
   button_target: string;
-}
-
-interface Collection {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  image_url: string | null;
 }
 
 interface Testimonial {
@@ -79,17 +73,6 @@ async function getFeaturedProducts(): Promise<Product[]> {
   }
 }
 
-async function getCollections(): Promise<Collection[]> {
-  try {
-    const response: any = await api.collections.getAll();
-    const collections = response.collections || response || [];
-    return collections.slice(0, 6); // Get top 6 collections
-  } catch (error: any) {
-    console.error('Error fetching collections:', error);
-    // Return empty array if API fails - section won't show
-    return [];
-  }
-}
 
 async function getTestimonials(): Promise<Testimonial[]> {
   try {
@@ -120,18 +103,218 @@ async function getTestimonials(): Promise<Testimonial[]> {
   }
 }
 
+interface QuickCategory {
+  name: string;
+  slug: string;
+  image_url: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  image_url: string | null;
+  description: string | null;
+  is_active?: boolean;
+}
+
+async function getQuickCategories(): Promise<QuickCategory[]> {
+  // Define the 4 required categories
+  const requiredCategories = [
+    { name: 'Blouses', slug: 'blouses', image_url: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&q=80' },
+    { name: 'Jewels', slug: 'jewels', image_url: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&q=80' },
+    { name: 'New Arrivals', slug: 'new-arrivals', image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&q=80' },
+    { name: 'Hot deals', slug: 'hot-deals', image_url: 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400&q=80' },
+  ];
+
+  try {
+    // Fetch existing categories from API
+    const response = await api.categories.getAll();
+    const categories = (response as { categories?: Category[] }).categories || (response as Category[]) || [];
+    
+    // Create a map of existing categories by slug
+    const categoryMap = new Map<string, Category>();
+    categories.forEach((cat) => {
+      categoryMap.set(cat.slug.toLowerCase(), cat);
+    });
+
+    // Build result array, using existing category data if found, otherwise use defaults
+    const result: QuickCategory[] = requiredCategories.map((req) => {
+      const existing = categoryMap.get(req.slug.toLowerCase());
+      return {
+        name: existing?.name || req.name,
+        slug: existing?.slug || req.slug,
+        image_url: existing?.image_url || req.image_url,
+      };
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error fetching categories, using defaults:', error);
+    // Fallback to default categories if API fails
+    return requiredCategories;
+  }
+}
+
+async function getAllCategories(): Promise<QuickCategory[]> {
+  try {
+    // Fetch all categories from API
+    const response = await api.categories.getAll();
+    const categories = (response as { categories?: Category[] }).categories || (response as Category[]) || [];
+    
+    // Filter only active categories and map to QuickCategory format
+    const result: QuickCategory[] = categories
+      .filter((cat) => cat.is_active !== false)
+      .map((cat) => ({
+        name: cat.name,
+        slug: cat.slug,
+        image_url: cat.image_url || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400&q=80',
+      }))
+      .slice(0, 12); // Limit to 12 categories for display
+
+    return result;
+  } catch (error) {
+    console.error('Error fetching all categories:', error);
+    return [];
+  }
+}
+
+interface Reel {
+  id: string;
+  title: string;
+  slug: string;
+  featured_image_url: string | null;
+  instagram_reel_url: string | null;
+  youtube_short_url: string | null;
+}
+
+interface Story {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  featured_image_url: string | null;
+  author_name: string | null;
+  published_at: string;
+  is_featured: boolean;
+}
+
+async function getReels(): Promise<Reel[]> {
+  try {
+    const response: any = await api.blog.getAll({ limit: 20 });
+    const articles = response.articles || [];
+    
+    // Filter articles that have reels or videos
+    const reels = articles
+      .filter((article: any) => 
+        article.instagram_reel_url || 
+        article.youtube_short_url ||
+        article.content_type === 'reel' ||
+        article.content_type === 'video'
+      )
+      .slice(0, 8) // Limit to 8 reels
+      .map((article: any) => ({
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        featured_image_url: article.featured_image_url,
+        instagram_reel_url: article.instagram_reel_url,
+        youtube_short_url: article.youtube_short_url,
+      }));
+
+    return reels;
+  } catch (error) {
+    console.error('Error fetching reels:', error);
+    return [];
+  }
+}
+
+async function getStories(): Promise<Story[]> {
+  try {
+    const response: any = await api.blog.getAll({ limit: 6, featured: true });
+    const articles = response.articles || [];
+    
+    // Get featured stories or recent stories
+    const stories = articles
+      .filter((article: any) => 
+        !article.instagram_reel_url && 
+        !article.youtube_short_url &&
+        article.content_type !== 'reel' &&
+        article.content_type !== 'video'
+      )
+      .slice(0, 6)
+      .map((article: any) => ({
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        excerpt: article.excerpt,
+        featured_image_url: article.featured_image_url,
+        author_name: article.author_name,
+        published_at: article.published_at,
+        is_featured: article.is_featured,
+      }));
+
+    return stories;
+  } catch (error) {
+    console.error('Error fetching stories:', error);
+    return [];
+  }
+}
+
 export default async function HomePage() {
-  const [heroSlides, featuredProducts, collections, testimonials] = await Promise.all([
+  const [heroSlides, featuredProducts, testimonials, quickCategories, allCategories, reels, stories] = await Promise.all([
     getHeroSlides(),
     getFeaturedProducts(),
-    getCollections(),
     getTestimonials(),
+    getQuickCategories(),
+    getAllCategories(),
+    getReels(),
+    getStories(),
   ]);
 
   return (
     <div className="min-h-screen">
+      {/* Quick Categories - Circular Icons (Above Hero) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        <div className="flex justify-center gap-4 md:gap-8 lg:gap-12 flex-wrap">
+          {quickCategories.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/products?category=${category.slug}`}
+              className="group flex flex-col items-center"
+            >
+              <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden bg-gray-100 mb-2 border-2 border-gray-200 group-hover:border-black transition-all shadow-sm">
+                <Image
+                  src={category.image_url}
+                  alt={category.name}
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-300"
+                  sizes="(max-width: 768px) 80px, (max-width: 1024px) 96px, 112px"
+                />
+              </div>
+              <span className="text-xs md:text-sm font-medium text-center group-hover:text-black transition-colors max-w-[100px]">
+                {category.name}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Hero Section */}
       <HeroCarousel slides={heroSlides} />
+
+      {/* Shop by Category Section */}
+      {allCategories.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="heading-serif-md mb-4">Shop by Category</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Explore our wide range of categories to find exactly what you're looking for
+            </p>
+          </div>
+          <ExpandableCategoryGrid categories={allCategories} />
+        </section>
+      )}
 
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -174,86 +357,74 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Collections Showcase */}
-      {collections.length > 0 && (
+      {/* Reels Section */}
+      {reels.length > 0 && <ReelsSection reels={reels} />}
+
+      {/* Stories Section */}
+      {stories.length > 0 && (
         <section className="bg-gray-50 py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="heading-serif-md mb-4">Shop By Collection</h2>
+              <h2 className="heading-serif-md mb-4">Stories</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Explore our curated collections, each telling a unique story of tradition and elegance
+                Discover inspiring stories, styling tips, and insights from the world of sarees
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {collections.map((collection) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stories.map((story) => (
                 <Link
-                  key={collection.id}
-                  href={`/collections/${collection.slug}`}
-                  className="group relative overflow-hidden bg-white border border-gray-200 hover:border-black transition-all"
+                  key={story.id}
+                  href={`/stories/${story.slug}`}
+                  className="bg-white border border-gray-200 hover:border-black transition-colors group"
                 >
-                  <div className="aspect-square relative bg-gray-100">
-                    {collection.image_url ? (
+                  {story.featured_image_url && (
+                    <div className="relative aspect-video bg-gray-100 overflow-hidden">
                       <Image
-                        src={collection.image_url}
-                        alt={collection.name}
+                        src={story.featured_image_url}
+                        alt={story.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <span className="text-4xl">👗</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4 text-center">
-                    <h3 className="font-medium text-sm group-hover:text-black transition-colors">
-                      {collection.name}
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="font-semibold mb-2 group-hover:text-black transition-colors line-clamp-2">
+                      {story.title}
                     </h3>
+                    {story.excerpt && (
+                      <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                        {story.excerpt}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      {story.author_name && (
+                        <span>By {story.author_name}</span>
+                      )}
+                      {story.published_at && (
+                        <span>
+                          {new Date(story.published_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}
             </div>
+
+            <div className="text-center mt-12">
+              <Link href="/stories" className="btn-outline">
+                Read All Stories
+              </Link>
+            </div>
           </div>
         </section>
       )}
-
-      {/* Why Choose Us Section */}
-      <section className="bg-black text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="heading-serif-md mb-4 text-white">Why Choose Saree4ever</h2>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              We bring you authentic, handcrafted sarees with a commitment to quality and tradition
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-5xl mb-4">✨</div>
-              <h3 className="text-xl font-semibold mb-2">Authentic Handlooms</h3>
-              <p className="text-gray-300">
-                Direct from weavers, ensuring authenticity and supporting traditional craftsmanship
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl mb-4">🚚</div>
-              <h3 className="text-xl font-semibold mb-2">Worldwide Shipping</h3>
-              <p className="text-gray-300">
-                Free shipping worldwide with complimentary falls and pico. Your dream saree delivered safely
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl mb-4">💎</div>
-              <h3 className="text-xl font-semibold mb-2">Premium Quality</h3>
-              <p className="text-gray-300">
-                Every saree is carefully curated and quality-checked before reaching you
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials Section */}
       {testimonials.length > 0 && (
@@ -341,94 +512,42 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Blog Preview Section */}
-      <section className="bg-gray-50 py-16">
+      {/* Why Choose Us Section */}
+      <section className="bg-black text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="heading-serif-md mb-4">Stories & Guides</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover the art of sarees, styling tips, and stories from our heritage
+            <h2 className="heading-serif-md mb-4 text-white">Why Choose Saree4ever</h2>
+            <p className="text-gray-300 max-w-2xl mx-auto">
+              We bring you authentic, handcrafted sarees with a commitment to quality and tradition
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link
-              href="/blog/art-of-draping-kanjivaram"
-              className="bg-white border border-gray-200 hover:border-black transition-colors group"
-            >
-              <div className="relative aspect-video bg-gray-100">
-                <Image
-                  src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&q=80"
-                  alt="The Art of Draping Kanjivaram"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="font-semibold mb-2 group-hover:text-black transition-colors">
-                  The Art of Draping Kanjivaram
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Master the perfect drape for your heavy silk sarees
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              href="/blog/history-of-banarasi-silk"
-              className="bg-white border border-gray-200 hover:border-black transition-colors group"
-            >
-              <div className="relative aspect-video bg-gray-100">
-                <Image
-                  src="https://images.unsplash.com/photo-1583391726247-e99ecdf93da2?w=800&q=80"
-                  alt="History of Banarasi Silk"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="font-semibold mb-2 group-hover:text-black transition-colors">
-                  History of Banarasi Silk
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Dive deep into the rich history of Banaras weaving
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              href="/blog/summer-saree-trends-2025"
-              className="bg-white border border-gray-200 hover:border-black transition-colors group"
-            >
-              <div className="relative aspect-video bg-gray-100">
-                <Image
-                  src="https://images.unsplash.com/photo-1627054248072-c7272273e883?w=800&q=80"
-                  alt="Summer Saree Trends 2025"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="font-semibold mb-2 group-hover:text-black transition-colors">
-                  Summer Saree Trends 2025
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Stay cool and stylish this summer
-                </p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/blog" className="btn-outline">
-              Read All Stories
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="text-5xl mb-4">✨</div>
+              <h3 className="text-xl font-semibold mb-2">Authentic Handlooms</h3>
+              <p className="text-gray-300">
+                Direct from weavers, ensuring authenticity and supporting traditional craftsmanship
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="text-5xl mb-4">🚚</div>
+              <h3 className="text-xl font-semibold mb-2">Worldwide Shipping</h3>
+              <p className="text-gray-300">
+                Free shipping worldwide with complimentary falls and pico. Your dream saree delivered safely
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="text-5xl mb-4">💎</div>
+              <h3 className="text-xl font-semibold mb-2">Premium Quality</h3>
+              <p className="text-gray-300">
+                Every saree is carefully curated and quality-checked before reaching you
+              </p>
+            </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }

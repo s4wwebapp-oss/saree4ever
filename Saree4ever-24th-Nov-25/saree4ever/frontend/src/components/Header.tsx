@@ -47,6 +47,10 @@ export default function Header() {
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [menuConfigs, setMenuConfigs] = useState<Record<string, MenuConfig>>({});
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const [wishlistCount] = useState(0); // TODO: Implement wishlist functionality
+  const [isScrolled, setIsScrolled] = useState(false);
   const { itemCount } = useCart();
   const pathname = usePathname();
   const shopDropdownRef = useRef<HTMLDivElement>(null);
@@ -93,6 +97,17 @@ export default function Header() {
     fetchData();
   }, []);
 
+  // Handle scroll to collapse announcement and menu bars
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      setIsScrolled(scrollTop > 50); // Show/hide after 50px scroll
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,744 +118,196 @@ export default function Header() {
       );
       if (isOutside) {
         setOpenDropdown(null);
+        setCategoryDropdownOpen(false);
       }
     };
-    if (openDropdown) {
+    if (openDropdown || categoryDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [openDropdown]);
+  }, [openDropdown, categoryDropdownOpen]);
 
   const isActive = (path: string) => pathname === path;
 
-  const renderAnnouncement = () => {
-    if (!announcement || !announcement.is_active) return null;
+  // Handle announcement carousel (if multiple announcements)
+  const handleAnnouncementPrev = () => {
+    // For now, just rotate if we have multiple announcements
+    setAnnouncementIndex((prev) => (prev === 0 ? 0 : prev - 1));
+  };
 
-    const content = (
-      <p className="uppercase tracking-wide">
-        {announcement.text}
-      </p>
-    );
+  const handleAnnouncementNext = () => {
+    // For now, just rotate if we have multiple announcements
+    setAnnouncementIndex((prev) => prev + 1);
+  };
 
-    if (announcement.link_url) {
-      return (
-        <Link
-          href={announcement.link_url}
-          target={announcement.link_target || '_self'}
-          className="block hover:opacity-80 transition-opacity"
-        >
-          {content}
-        </Link>
-      );
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
     }
-
-    return content;
   };
 
   return (
     <header className="bg-white sticky top-0 z-50">
-      {/* Top Announcement Bar */}
+      {/* Top Announcement Bar - Black (Collapses on scroll) */}
       {announcement && announcement.is_active && (
-        <div className="bg-black text-white text-xs py-2 text-center">
-          {renderAnnouncement()}
+        <div className={`bg-black text-white text-xs md:text-sm py-2.5 relative transition-all duration-300 ${
+          isScrolled ? 'hidden' : 'block'
+        }`}>
+          <div className="max-w-7xl mx-auto px-4 flex items-center justify-center">
+            {/* Left Arrow */}
+            <button
+              onClick={handleAnnouncementPrev}
+              className="absolute left-4 p-1 hover:opacity-70 transition-opacity"
+              aria-label="Previous announcement"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Announcement Text */}
+            <div className="text-center flex-1">
+              {announcement.link_url ? (
+                <Link
+                  href={announcement.link_url}
+                  target={announcement.link_target || '_self'}
+                  className="block hover:opacity-80 transition-opacity"
+                >
+                  {announcement.text}
+                </Link>
+              ) : (
+                <p>{announcement.text}</p>
+              )}
+            </div>
+
+            {/* Right Arrow */}
+            <button
+              onClick={handleAnnouncementNext}
+              className="absolute right-4 p-1 hover:opacity-70 transition-opacity"
+              aria-label="Next announcement"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Branding Area */}
-      <div className="bg-white py-6 text-center border-b border-gray-200">
-        <Link href="/" className="block">
-          <h1 className="heading-serif text-4xl md:text-5xl font-bold mb-2">saree4ever</h1>
-          <p className="text-sm font-sans tracking-widest uppercase text-gray-600">
-            DRAPE YOUR DREAM
-          </p>
-        </Link>
-      </div>
-
-      {/* Main Navigation Bar */}
+      {/* Main Header Section - Fixed on scroll */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex items-center justify-center h-14 pr-0">
-            {/* Center Navigation */}
-            <nav className="hidden md:flex items-center space-x-6 mx-auto">
-              <Link
-                href="/"
-                className={`text-sm font-medium hover:underline text-black ${
-                  isActive('/') ? 'font-semibold' : ''
-                }`}
-              >
-                Home
-              </Link>
-              <Link
-                href="/collections/new-arrivals"
-                className={`text-sm font-medium hover:underline text-black ${
-                  isActive('/collections/new-arrivals') ? 'font-semibold' : ''
-                }`}
-              >
-                New Arrivals
-              </Link>
-
-              <Link
-                href="/products"
-                className={`text-sm font-medium hover:underline text-black ${
-                  isActive('/products') || pathname.startsWith('/products/') ? 'font-semibold' : ''
-                }`}
-              >
-                All Products
-              </Link>
-
-              {/* Shop By Dropdown */}
-              <div className="relative" ref={shopDropdownRef}>
-                <button
-                  onClick={() => setOpenDropdown(openDropdown === 'shop' ? null : 'shop')}
-                  className={`text-sm flex items-center space-x-1 transition-colors ${
-                    openDropdown === 'shop' 
-                      ? 'text-[#800000] font-bold underline' 
-                      : 'text-black font-medium hover:text-[#800000] hover:font-bold hover:underline'
-                  }`}
-                >
-                  <span>Shop By</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
-                      openDropdown === 'shop' ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                {openDropdown === 'shop' && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-2xl z-50 w-[600px]">
-                    <div className="grid grid-cols-3 gap-0 py-3 px-3">
-                      {/* Column 1 */}
-                      <div className="pr-0 w-full">
-                        <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
-                          {menuConfigs.shop_by?.column_1_title || 'HERITAGE SILKS'}
-                        </h3>
-                        <ul className="space-y-1.5 w-full">
-                          {types
-                            .filter((type) => {
-                              const name = type.name.toLowerCase();
-                              return (
-                                name.includes('kanjeevaram') ||
-                                name.includes('kanchipuram') ||
-                                name.includes('banarasi') ||
-                                name.includes('paithani') ||
-                                name.includes('tussar') ||
-                                name.includes('mysore') ||
-                                name.includes('kosa') ||
-                                name.includes('muga') ||
-                                name.includes('silk')
-                              );
-                            })
-                            .map((type) => (
-                              <li key={type.id}>
-                                <Link
-                                  href={`/types/${type.slug}`}
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  {type.name}
-                                </Link>
-                              </li>
-                            ))}
-                          {/* Fallback items if types don't exist */}
-                          {types.filter((type) => {
-                            const name = type.name.toLowerCase();
-                            return (
-                              name.includes('kanjeevaram') ||
-                              name.includes('kanchipuram') ||
-                              name.includes('banarasi') ||
-                              name.includes('paithani') ||
-                              name.includes('tussar') ||
-                              name.includes('mysore') ||
-                              name.includes('kosa') ||
-                              name.includes('muga') ||
-                              name.includes('silk')
-                            );
-                          }).length === 0 && (
-                            <>
-                              <li>
-                                <Link
-                                  href="/products?type=kanjeevaram"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Kanjeevaram / Kanchipuram Silk
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=banarasi"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Banarasi Silk
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=paithani"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Paithani
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=tussar"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Tussar / Tussar Silk
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=mysore"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Mysore Silk
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=kosa"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Kosa Silk
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=muga"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Muga Silk
-                                </Link>
-                              </li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-
-                      {/* Column 2 */}
-                      <div className="px-0 w-full">
-                        <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
-                          {menuConfigs.shop_by?.column_2_title || 'COTTON & HANDLOOM'}
-                        </h3>
-                        <ul className="space-y-1.5 w-full">
-                          {types
-                            .filter((type) => {
-                              const name = type.name.toLowerCase();
-                              return (
-                                name.includes('cotton') ||
-                                name.includes('chanderi') ||
-                                name.includes('jamdani') ||
-                                name.includes('linen') ||
-                                name.includes('ikat') ||
-                                name.includes('pochampally') ||
-                                name.includes('patola') ||
-                                name.includes('sambalpuri') ||
-                                name.includes('gadwal') ||
-                                name.includes('tant') ||
-                                name.includes('bengal') ||
-                                name.includes('handloom')
-                              );
-                            })
-                            .map((type) => (
-                              <li key={type.id}>
-                                <Link
-                                  href={`/types/${type.slug}`}
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  {type.name}
-                                </Link>
-                              </li>
-                            ))}
-                          {/* Fallback items if types don't exist */}
-                          {types.filter((type) => {
-                            const name = type.name.toLowerCase();
-                            return (
-                              name.includes('cotton') ||
-                              name.includes('chanderi') ||
-                              name.includes('jamdani') ||
-                              name.includes('linen') ||
-                              name.includes('ikat') ||
-                              name.includes('pochampally') ||
-                              name.includes('patola') ||
-                              name.includes('sambalpuri') ||
-                              name.includes('gadwal') ||
-                              name.includes('tant') ||
-                              name.includes('bengal') ||
-                              name.includes('handloom')
-                            );
-                          }).length === 0 && (
-                            <>
-                              <li>
-                                <Link
-                                  href="/products?type=cotton"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Cotton Saree
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=chanderi"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Chanderi
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=jamdani"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Jamdani
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=linen"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Linen Saree
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=ikat"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Ikat / Pochampally
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=patola"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Patola
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=sambalpuri"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Sambalpuri
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=gadwal"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Gadwal
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=tant"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Tant / Bengal Cotton
-                                </Link>
-                              </li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-
-                      {/* Column 3 */}
-                      <div className="pl-0 w-full">
-                        <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
-                          {menuConfigs.shop_by?.column_3_title || 'MODERN & CONTEMPORARY'}
-                        </h3>
-                        <ul className="space-y-1.5 w-full">
-                          {types
-                            .filter((type) => {
-                              const name = type.name.toLowerCase();
-                              return (
-                                name.includes('chiffon') ||
-                                name.includes('georgette') ||
-                                name.includes('organza') ||
-                                name.includes('crepe') ||
-                                name.includes('printed') ||
-                                name.includes('embroidered') ||
-                                name.includes('sequined') ||
-                                name.includes('stonework') ||
-                                name.includes('semi-stitched') ||
-                                name.includes('ready-to-wear') ||
-                                name.includes('contemporary') ||
-                                name.includes('modern')
-                              );
-                            })
-                            .map((type) => (
-                              <li key={type.id}>
-                                <Link
-                                  href={`/types/${type.slug}`}
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  {type.name}
-                                </Link>
-                              </li>
-                            ))}
-                          {/* Fallback items if types don't exist */}
-                          {types.filter((type) => {
-                            const name = type.name.toLowerCase();
-                            return (
-                              name.includes('chiffon') ||
-                              name.includes('georgette') ||
-                              name.includes('organza') ||
-                              name.includes('crepe') ||
-                              name.includes('printed') ||
-                              name.includes('embroidered') ||
-                              name.includes('sequined') ||
-                              name.includes('stonework') ||
-                              name.includes('semi-stitched') ||
-                              name.includes('ready-to-wear') ||
-                              name.includes('contemporary') ||
-                              name.includes('modern')
-                            );
-                          }).length === 0 && (
-                            <>
-                              <li>
-                                <Link
-                                  href="/products?type=chiffon"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Chiffon
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=georgette"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Georgette
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=organza"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Organza
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=crepe"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Crepe
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=printed"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Printed Saree
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=embroidered"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Embroidered Saree
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=sequined"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Sequined / Stonework
-                                </Link>
-                              </li>
-                              <li>
-                                <Link
-                                  href="/products?type=semi-stitched"
-                                  className="text-sm text-gray-700 hover:text-black hover:underline block"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  Semi-stitched / Ready-to-wear
-                                </Link>
-                              </li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-                    
-                    {/* View All Fabrics Link */}
-                    <div className="border-t border-gray-200 pt-4 mt-4">
-                      <Link
-                        href="/products"
-                        className="text-sm font-medium text-black hover:underline uppercase tracking-wide text-center block"
-                        onClick={() => setOpenDropdown(null)}
-                      >
-                        VIEW ALL FABRICS
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Collections Dropdown */}
-              <div className="relative" ref={collectionsDropdownRef}>
-                <button
-                  onClick={() => setOpenDropdown(openDropdown === 'collections' ? null : 'collections')}
-                  className={`text-sm flex items-center space-x-1 transition-colors ${
-                    openDropdown === 'collections' 
-                      ? 'text-[#800000] font-bold underline' 
-                      : 'text-black font-medium hover:text-[#800000] hover:font-bold hover:underline'
-                  }`}
-                >
-                  <span>Collections</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
-                      openDropdown === 'collections' ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                {openDropdown === 'collections' && collections.length > 0 && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-2xl z-50 w-[600px]">
-                    <div className="grid grid-cols-3 gap-0 py-3 px-3">
-                      {/* Distribute collections across 3 columns */}
-                      {Array.from({ length: 3 }).map((_, colIndex) => {
-                        const itemsPerColumn = Math.ceil(collections.length / 3);
-                        const startIndex = colIndex * itemsPerColumn;
-                        const endIndex = startIndex + itemsPerColumn;
-                        const columnCollections = collections.slice(startIndex, endIndex);
-                        const columnTitle = colIndex === 0 
-                          ? (menuConfigs.collections?.column_1_title || 'FEATURED COLLECTIONS')
-                          : colIndex === 1 
-                          ? (menuConfigs.collections?.column_2_title || 'POPULAR COLLECTIONS')
-                          : (menuConfigs.collections?.column_3_title || 'NEW COLLECTIONS');
-                        
-                        return (
-                          <div
-                            key={colIndex}
-                            className={`${colIndex > 0 ? 'px-0' : 'pr-0'} w-full`}
-                          >
-                            <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
-                              {columnTitle}
-                            </h3>
-                            <ul className="space-y-1.5 w-full">
-                              {columnCollections.map((collection) => (
-                                <li key={collection.id}>
-                                  <Link
-                                    href={`/collections/${collection.slug}`}
-                                    className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
-                                    onClick={() => setOpenDropdown(null)}
-                                  >
-                                    {collection.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="border-t border-gray-200 pt-4 mt-4">
-                      <Link
-                        href="/collections"
-                        className="text-sm font-medium text-black hover:underline uppercase tracking-wide text-center block"
-                        onClick={() => setOpenDropdown(null)}
-                      >
-                        VIEW ALL COLLECTIONS
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Categories Dropdown */}
-              <div className="relative" ref={categoriesDropdownRef}>
-                <button
-                  onClick={() => setOpenDropdown(openDropdown === 'categories' ? null : 'categories')}
-                  className={`text-sm flex items-center space-x-1 transition-colors ${
-                    openDropdown === 'categories' 
-                      ? 'text-[#800000] font-bold underline' 
-                      : 'text-black font-medium hover:text-[#800000] hover:font-bold hover:underline'
-                  }`}
-                >
-                  <span>Categories</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
-                      openDropdown === 'categories' ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                {openDropdown === 'categories' && categories.length > 0 && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-2xl z-50 w-[600px]">
-                    <div className="grid grid-cols-3 gap-0 py-3 px-3">
-                      {/* Distribute categories across 3 columns */}
-                      {Array.from({ length: 3 }).map((_, colIndex) => {
-                        const itemsPerColumn = Math.ceil(categories.length / 3);
-                        const startIndex = colIndex * itemsPerColumn;
-                        const endIndex = startIndex + itemsPerColumn;
-                        const columnCategories = categories.slice(startIndex, endIndex);
-                        const columnTitle = colIndex === 0 
-                          ? (menuConfigs.categories?.column_1_title || 'TRADITIONAL')
-                          : colIndex === 1 
-                          ? (menuConfigs.categories?.column_2_title || 'OCCASIONS')
-                          : (menuConfigs.categories?.column_3_title || 'STYLES');
-                        
-                        return (
-                          <div
-                            key={colIndex}
-                            className={`${colIndex > 0 ? 'px-0' : 'pr-0'} w-full`}
-                          >
-                            <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1.5 border-b border-gray-200 text-black w-full">
-                              {columnTitle}
-                            </h3>
-                            <ul className="space-y-1.5 w-full">
-                              {columnCategories.map((category) => (
-                                <li key={category.id}>
-                                  <Link
-                                    href={`/categories/${category.slug}`}
-                                    className="text-sm text-gray-700 hover:text-black hover:underline block w-full"
-                                    onClick={() => setOpenDropdown(null)}
-                                  >
-                                    {category.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="border-t border-gray-200 pt-4 mt-4">
-                      <Link
-                        href="/categories"
-                        className="text-sm font-medium text-black hover:underline uppercase tracking-wide text-center block"
-                        onClick={() => setOpenDropdown(null)}
-                      >
-                        VIEW ALL CATEGORIES
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <Link
-                href="/offers"
-                className={`text-sm font-medium hover:underline text-black ${
-                  isActive('/offers') ? 'font-semibold' : ''
-                }`}
-              >
-                Offers
-              </Link>
-
-              <Link
-                href="/stories"
-                className={`text-sm font-medium hover:underline text-black ${
-                  isActive('/stories') || pathname.startsWith('/stories/') ? 'font-semibold' : ''
-                }`}
-              >
-                Stories
-              </Link>
-            </nav>
-
-            {/* Right Utilities */}
-            <div className="absolute -right-4 sm:-right-6 lg:-right-8 top-1/2 -translate-y-1/2 flex items-center space-x-6">
-            {/* Search */}
-            <Link
-              href="/search"
-              className="hidden md:flex items-center space-x-2 text-gray-500 hover:text-gray-700"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <span className="text-sm font-medium">SEARCH</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Brand Name - Centered Below Announcement (Collapses on scroll) */}
+          <div className={`text-center py-4 border-b border-gray-200 transition-all duration-300 ${
+            isScrolled ? 'hidden' : 'block'
+          }`}>
+            <Link href="/" className="inline-block">
+              <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-black">
+                Saree4ever
+              </h1>
             </Link>
+          </div>
 
-              {/* Account */}
-              <Link href="/account" className="p-2 hover:opacity-70 transition-opacity">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
+          {/* Search Bar and User Actions Row - Always visible */}
+          <div className="flex items-center gap-4 py-4">
+            {/* Search Bar with Category Dropdown */}
+            <div className="flex-1 flex items-center">
+              <form onSubmit={handleSearch} className="flex-1 flex items-center border border-gray-300 rounded-sm">
+                {/* All Categories Dropdown */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                    className="px-4 py-2.5 border-r border-gray-300 flex items-center gap-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <span>All Categories</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {/* Category Dropdown Menu */}
+                  {categoryDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 shadow-lg z-50 min-w-[200px] max-h-96 overflow-y-auto">
+                      <div className="py-2">
+                        {categories.slice(0, 20).map((category) => (
+                          <Link
+                            key={category.id}
+                            href={`/categories/${category.slug}`}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black"
+                            onClick={() => setCategoryDropdownOpen(false)}
+                          >
+                            {category.name}
+                          </Link>
+                        ))}
+                        {categories.length > 20 && (
+                          <Link
+                            href="/categories"
+                            className="block px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 border-t border-gray-200"
+                            onClick={() => setCategoryDropdownOpen(false)}
+                          >
+                            View All Categories
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Search Input */}
+                <input
+                  type="text"
+                  placeholder="What are you looking for?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-2.5 text-sm focus:outline-none"
+                />
+
+                {/* Search Button */}
+                <button
+                  type="submit"
+                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 transition-colors"
+                  aria-label="Search"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </form>
+            </div>
+
+            {/* Right Side Icons */}
+            <div className="flex items-center gap-4 md:gap-6">
+              {/* Favourites/Wishlist Icon */}
+              <Link href="/wishlist" className="relative flex items-center hover:opacity-70 transition-opacity">
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
-              {/* Cart */}
-              <Link href="/cart" className="relative p-2 hover:opacity-70 transition-opacity">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                  />
+              {/* Sign in/Register */}
+              <Link href="/account" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
+                <span className="hidden md:inline text-sm font-medium text-gray-700">Sign in/ Register</span>
+              </Link>
+
+              {/* Shopping Bag/Cart */}
+              <Link href="/cart" className="relative flex items-center hover:opacity-70 transition-opacity">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
                 {itemCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {itemCount}
                   </span>
                 )}
@@ -873,67 +340,313 @@ export default function Header() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <nav className="flex flex-col space-y-4 px-4">
-              <Link
-                href="/"
-                className="text-sm font-medium text-black"
-                onClick={() => setIsMenuOpen(false)}
+      {/* Menu Bar - Navigation Links (Collapses on scroll) */}
+      <div className={`bg-white border-b border-gray-200 transition-all duration-300 ${
+        isScrolled ? 'hidden' : 'block'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center justify-center gap-4 md:gap-6 lg:gap-8 py-3 overflow-x-auto">
+            <Link
+              href="/"
+              className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${
+                isActive('/') ? 'font-semibold underline' : ''
+              }`}
+            >
+              Home
+            </Link>
+            <Link
+              href="/collections/new-arrivals"
+              className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${
+                isActive('/collections/new-arrivals') ? 'font-semibold underline' : ''
+              }`}
+            >
+              New Arrivals
+            </Link>
+            <Link
+              href="/products"
+              className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${
+                isActive('/products') ? 'font-semibold underline' : ''
+              }`}
+            >
+              All Products
+            </Link>
+
+            {/* Shop By Dropdown */}
+            <div className="relative" ref={shopDropdownRef}>
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'shop-by' ? null : 'shop-by')}
+                className={`text-sm font-medium whitespace-nowrap hover:underline text-black flex items-center gap-1 ${
+                  openDropdown === 'shop-by' ? 'font-semibold underline' : ''
+                }`}
               >
-                Home
-              </Link>
-              <Link
-                href="/collections/new-arrivals"
-                className="text-sm font-medium text-black"
-                onClick={() => setIsMenuOpen(false)}
+                <span>Shop By</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openDropdown === 'shop-by' && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-lg z-50 min-w-[200px] py-2">
+                  {types.slice(0, 15).map((type) => (
+                    <Link
+                      key={type.id}
+                      href={`/products?type=${type.slug}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      {type.name}
+                    </Link>
+                  ))}
+                  {types.length > 15 && (
+                    <Link
+                      href="/products"
+                      className="block px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 border-t border-gray-200"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      View All Types
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Collections Dropdown */}
+            <div className="relative" ref={collectionsDropdownRef}>
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'collections' ? null : 'collections')}
+                className={`text-sm font-medium whitespace-nowrap hover:underline text-black flex items-center gap-1 ${
+                  openDropdown === 'collections' ? 'font-semibold underline' : ''
+                }`}
               >
-                New Arrivals
-              </Link>
-              <Link
-                href="/types"
-                className="text-sm font-medium text-black"
-                onClick={() => setIsMenuOpen(false)}
+                <span>Collections</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openDropdown === 'collections' && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-lg z-50 min-w-[200px] max-h-96 overflow-y-auto py-2">
+                  {collections.slice(0, 20).map((collection) => (
+                    <Link
+                      key={collection.id}
+                      href={`/collections/${collection.slug}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      {collection.name}
+                    </Link>
+                  ))}
+                  {collections.length > 20 && (
+                    <Link
+                      href="/collections"
+                      className="block px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 border-t border-gray-200"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      View All Collections
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Categories Dropdown */}
+            <div className="relative" ref={categoriesDropdownRef}>
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'categories' ? null : 'categories')}
+                className={`text-sm font-medium whitespace-nowrap hover:underline text-black flex items-center gap-1 ${
+                  openDropdown === 'categories' ? 'font-semibold underline' : ''
+                }`}
               >
-                Shop By Type
-              </Link>
-              <Link
-                href="/categories"
-                className="text-sm font-medium text-black"
-                onClick={() => setIsMenuOpen(false)}
+                <span>Categories</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openDropdown === 'categories' && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white border border-gray-200 shadow-lg z-50 min-w-[200px] max-h-96 overflow-y-auto py-2">
+                  {categories.slice(0, 20).map((category) => (
+                    <Link
+                      key={category.id}
+                      href={`/categories/${category.slug}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                  {categories.length > 20 && (
+                    <Link
+                      href="/categories"
+                      className="block px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 border-t border-gray-200"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      View All Categories
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/offers"
+              className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${
+                isActive('/offers') ? 'font-semibold underline' : ''
+              }`}
+            >
+              Offers
+            </Link>
+            <Link
+              href="/stories"
+              className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${
+                isActive('/stories') ? 'font-semibold underline' : ''
+              }`}
+            >
+              Stories
+            </Link>
+          </nav>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 py-4">
+          <nav className="flex flex-col space-y-4 px-4">
+            <Link
+              href="/"
+              className="text-sm font-medium text-black"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="/collections/new-arrivals"
+              className="text-sm font-medium text-black"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              New Arrivals
+            </Link>
+            <Link
+              href="/products"
+              className="text-sm font-medium text-black"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              All Products
+            </Link>
+            <div className="pt-2">
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'shop-by-mobile' ? null : 'shop-by-mobile')}
+                className="text-sm font-medium text-black flex items-center gap-2 w-full"
               >
-                Shop By Category
-              </Link>
-              <Link
-                href="/collections"
-                className="text-sm font-medium text-black"
-                onClick={() => setIsMenuOpen(false)}
+                Shop By
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openDropdown === 'shop-by-mobile' && (
+                <div className="pl-4 pt-2 space-y-2">
+                  {types.slice(0, 10).map((type) => (
+                    <Link
+                      key={type.id}
+                      href={`/products?type=${type.slug}`}
+                      className="block text-sm text-gray-600"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      {type.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="pt-2">
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'collections-mobile' ? null : 'collections-mobile')}
+                className="text-sm font-medium text-black flex items-center gap-2 w-full"
               >
                 Collections
-              </Link>
-              <Link
-                href="/offers"
-                className="text-sm font-medium text-black"
-                onClick={() => setIsMenuOpen(false)}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openDropdown === 'collections-mobile' && (
+                <div className="pl-4 pt-2 space-y-2">
+                  {collections.slice(0, 10).map((collection) => (
+                    <Link
+                      key={collection.id}
+                      href={`/collections/${collection.slug}`}
+                      className="block text-sm text-gray-600"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      {collection.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="pt-2">
+              <button
+                onClick={() => setOpenDropdown(openDropdown === 'categories-mobile' ? null : 'categories-mobile')}
+                className="text-sm font-medium text-black flex items-center gap-2 w-full"
               >
-                Offers
-              </Link>
-              <div className="pt-4 border-t border-gray-200">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input-field w-full text-sm"
-                />
-              </div>
-            </nav>
-          </div>
-        )}
-      </div>
+                Categories
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {openDropdown === 'categories-mobile' && (
+                <div className="pl-4 pt-2 space-y-2">
+                  {categories.slice(0, 10).map((category) => (
+                    <Link
+                      key={category.id}
+                      href={`/categories/${category.slug}`}
+                      className="block text-sm text-gray-600"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Link
+              href="/offers"
+              className="text-sm font-medium text-black"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Offers
+            </Link>
+            <Link
+              href="/stories"
+              className="text-sm font-medium text-black"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Stories
+            </Link>
+            <div className="pt-4 border-t border-gray-200">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch(e as any);
+                  }
+                }}
+                className="input-field w-full text-sm"
+              />
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
-

@@ -31,12 +31,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
 
     try {
       if (mode === 'signup') {
+        // Validate phone number is provided
+        if (!formData.phone || formData.phone.trim() === '') {
+          setError('Phone number is required');
+          setLoading(false);
+          return;
+        }
+
         // Sign up
         await api.auth.signup({
           email: formData.email,
           password: formData.password,
           full_name: formData.full_name || undefined,
-          phone: formData.phone || undefined,
+          phone: formData.phone.trim(),
         });
         
         // After signup, automatically sign in
@@ -130,13 +137,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
               </div>
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone (Optional)
+                  Phone *
                 </label>
                 <input
                   type="tel"
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  required
                   className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black"
                   placeholder="+91 1234567890"
                 />

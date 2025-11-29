@@ -256,6 +256,11 @@ export default async function ProductDetailPage({
               )}
             </div>
 
+            {/* Variant Selector */}
+            <div className="mb-6">
+              <ProductVariantSelector product={product} variants={product.variants || []} />
+            </div>
+
             {/* Product Highlights */}
             {product.description && (
               <ProductHighlights
@@ -269,11 +274,6 @@ export default async function ProductDetailPage({
                 ]}
               />
             )}
-
-            {/* Variant Selector */}
-            <div className="mb-6">
-              <ProductVariantSelector product={product} variants={product.variants || []} />
-            </div>
 
             {/* Delivery Information */}
             <div className="mb-6">
