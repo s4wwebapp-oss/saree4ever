@@ -49,6 +49,7 @@ export default function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [wishlistCount] = useState(0); // TODO: Implement wishlist functionality
   const [isScrolled, setIsScrolled] = useState(false);
   const { itemCount } = useCart();
@@ -83,8 +84,35 @@ export default function Header() {
 
         // Set announcement
         const announcementData = (announcementRes as { announcement?: Announcement }).announcement;
-        if (announcementData) {
-          setAnnouncement(announcementData);
+        
+        // Create mock announcements array
+        const mockAnnouncements: Announcement[] = [
+          {
+            id: 'mock-1',
+            text: 'FREE SHIPPING WORLDWIDE | COMPLIMENTARY FALLS & PICO',
+            link_url: null,
+            link_target: '_self',
+            is_active: true,
+          },
+          {
+            id: 'mock-2',
+            text: '🎉 Special Offer: Get 20% off on all Kanjivaram Silk Sarees. Limited time only!',
+            link_url: '/collections/kanjivaram',
+            link_target: '_self',
+            is_active: true,
+          },
+        ];
+
+        // Combine API announcement with mock announcements
+        const allAnnouncements: Announcement[] = [];
+        if (announcementData && announcementData.is_active) {
+          allAnnouncements.push(announcementData);
+        }
+        allAnnouncements.push(...mockAnnouncements);
+
+        setAnnouncements(allAnnouncements);
+        if (allAnnouncements.length > 0) {
+          setAnnouncement(allAnnouncements[0]);
         }
 
         // Set menu configs
@@ -129,15 +157,34 @@ export default function Header() {
 
   const isActive = (path: string) => pathname === path;
 
+  // Auto-scroll announcements
+  useEffect(() => {
+    if (announcements.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setAnnouncementIndex((prev) => {
+        const nextIndex = (prev + 1) % announcements.length;
+        setAnnouncement(announcements[nextIndex]);
+        return nextIndex;
+      });
+    }, 5000); // Change announcement every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [announcements]);
+
   // Handle announcement carousel (if multiple announcements)
   const handleAnnouncementPrev = () => {
-    // For now, just rotate if we have multiple announcements
-    setAnnouncementIndex((prev) => (prev === 0 ? 0 : prev - 1));
+    if (announcements.length <= 1) return;
+    const newIndex = announcementIndex === 0 ? announcements.length - 1 : announcementIndex - 1;
+    setAnnouncementIndex(newIndex);
+    setAnnouncement(announcements[newIndex]);
   };
 
   const handleAnnouncementNext = () => {
-    // For now, just rotate if we have multiple announcements
-    setAnnouncementIndex((prev) => prev + 1);
+    if (announcements.length <= 1) return;
+    const newIndex = (announcementIndex + 1) % announcements.length;
+    setAnnouncementIndex(newIndex);
+    setAnnouncement(announcements[newIndex]);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -151,46 +198,69 @@ export default function Header() {
     <header className="bg-white sticky top-0 z-50">
       {/* Top Announcement Bar - Black (Collapses on scroll) */}
       {announcement && announcement.is_active && (
-        <div className={`bg-black text-white text-xs md:text-sm py-2.5 relative transition-all duration-300 ${
+        <div className={`bg-black text-white text-xs md:text-sm py-2 md:py-2.5 relative transition-all duration-300 ${
           isScrolled ? 'hidden' : 'block'
         }`}>
-          <div className="max-w-7xl mx-auto px-4 flex items-center justify-center">
+          <div className="max-w-7xl mx-auto px-8 md:px-4 flex items-center justify-center">
             {/* Left Arrow */}
-            <button
-              onClick={handleAnnouncementPrev}
-              className="absolute left-4 p-1 hover:opacity-70 transition-opacity"
-              aria-label="Previous announcement"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
+            {announcements.length > 1 && (
+              <button
+                onClick={handleAnnouncementPrev}
+                className="absolute left-2 md:left-4 p-1 hover:opacity-70 transition-opacity z-10"
+                aria-label="Previous announcement"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
 
-            {/* Announcement Text */}
-            <div className="text-center flex-1">
+            {/* Announcement Text - Allow wrapping on mobile */}
+            <div className="text-center flex-1 px-6 md:px-0">
               {announcement.link_url ? (
                 <Link
                   href={announcement.link_url}
                   target={announcement.link_target || '_self'}
-                  className="block hover:opacity-80 transition-opacity"
+                  className="block hover:opacity-80 transition-opacity break-words whitespace-normal"
                 >
                   {announcement.text}
                 </Link>
               ) : (
-                <p>{announcement.text}</p>
+                <p className="break-words whitespace-normal">{announcement.text}</p>
               )}
             </div>
 
             {/* Right Arrow */}
-            <button
-              onClick={handleAnnouncementNext}
-              className="absolute right-4 p-1 hover:opacity-70 transition-opacity"
-              aria-label="Next announcement"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            {announcements.length > 1 && (
+              <button
+                onClick={handleAnnouncementNext}
+                className="absolute right-2 md:right-4 p-1 hover:opacity-70 transition-opacity z-10"
+                aria-label="Next announcement"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+
+            {/* Carousel Indicators */}
+            {announcements.length > 1 && (
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+                {announcements.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setAnnouncementIndex(index);
+                      setAnnouncement(announcements[index]);
+                    }}
+                    className={`w-1.5 h-1.5 rounded-full transition-opacity ${
+                      index === announcementIndex ? 'bg-white' : 'bg-white/40'
+                    }`}
+                    aria-label={`Go to announcement ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -198,9 +268,9 @@ export default function Header() {
       {/* Main Header Section - Fixed on scroll */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Brand Name - Centered Below Announcement (Collapses on scroll) */}
-          <div className={`text-center py-4 border-b border-gray-200 transition-all duration-300 ${
-            isScrolled ? 'hidden' : 'block'
+          {/* Brand Name - Centered Below Announcement (Collapses on scroll) - Desktop only */}
+          <div className={`text-center py-4 border-b border-gray-200 transition-all duration-300 hidden md:block ${
+            isScrolled ? 'hidden' : ''
           }`}>
             <Link href="/" className="inline-block">
               <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-black">
@@ -209,20 +279,88 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Search Bar and User Actions Row - Always visible */}
-          <div className="flex items-center gap-4 py-4">
+          {/* Mobile Top Row: Hamburger | Logo | Favorites + Profile */}
+          <div className="md:hidden flex items-center justify-between py-3">
+            {/* Mobile menu button - Left side */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 flex-shrink-0"
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                {isMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
+
+            {/* Brand Logo - Center */}
+            <Link href="/" className="flex-1 text-center">
+              <h1 className="font-serif text-xl font-bold text-black">
+                Saree4ever
+              </h1>
+            </Link>
+
+            {/* Favorites, Profile, and Cart Icons - Right side */}
+            <div className="flex items-center gap-3">
+              {/* Favourites/Wishlist Icon */}
+              <Link href="/wishlist" className="relative flex items-center hover:opacity-70 transition-opacity">
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Sign in/Register Icon */}
+              <Link href="/account" className="flex items-center hover:opacity-70 transition-opacity">
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
+
+              {/* Shopping Bag/Cart Icon - Mobile */}
+              <Link href="/cart" className="relative flex items-center hover:opacity-70 transition-opacity">
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          </div>
+
+          {/* Search Bar Row - Mobile and Desktop */}
+          <div className="flex items-center gap-2 md:gap-4 py-2 md:py-4">
             {/* Search Bar with Category Dropdown */}
             <div className="flex-1 flex items-center">
               <form onSubmit={handleSearch} className="flex-1 flex items-center border border-gray-300 rounded-sm">
-                {/* All Categories Dropdown */}
+                {/* All Categories Dropdown - Smaller on mobile */}
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                    className="px-4 py-2.5 border-r border-gray-300 flex items-center gap-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="px-2 md:px-4 py-1.5 md:py-2.5 border-r border-gray-300 flex items-center gap-1 text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
-                    <span>All Categories</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="hidden sm:inline">All Categories</span>
+                    <span className="sm:hidden">All</span>
+                    <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
@@ -255,31 +393,30 @@ export default function Header() {
                   )}
                 </div>
 
-                {/* Search Input */}
+                {/* Search Input - Smaller on mobile */}
                 <input
                   type="text"
                   placeholder="What are you looking for?"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 px-4 py-2.5 text-sm focus:outline-none"
+                  className="flex-1 px-2 md:px-4 py-1.5 md:py-2.5 text-xs md:text-sm focus:outline-none bg-gray-100"
                 />
 
-                {/* Search Button */}
+                {/* Search Button - Smaller on mobile */}
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 transition-colors"
+                  className="px-2 md:px-4 py-1.5 md:py-2.5 bg-gray-100 hover:bg-gray-200 transition-colors"
                   aria-label="Search"
                 >
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
               </form>
             </div>
 
-            {/* Right Side Icons */}
-            <div className="flex items-center gap-4 md:gap-6">
-              {/* Favourites/Wishlist Icon */}
+            {/* Shopping Bag/Cart - Desktop only in this row, mobile shows in top row if needed */}
+            <div className="hidden md:flex items-center gap-4 md:gap-6">
               <Link href="/wishlist" className="relative flex items-center hover:opacity-70 transition-opacity">
                 <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -291,7 +428,6 @@ export default function Header() {
                 )}
               </Link>
 
-              {/* Sign in/Register */}
               <Link href="/account" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
                 <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -299,7 +435,6 @@ export default function Header() {
                 <span className="hidden md:inline text-sm font-medium text-gray-700">Sign in/ Register</span>
               </Link>
 
-              {/* Shopping Bag/Cart */}
               <Link href="/cart" className="relative flex items-center hover:opacity-70 transition-opacity">
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                   <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,32 +447,8 @@ export default function Header() {
                   </span>
                 )}
               </Link>
-
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2"
-                aria-label="Toggle menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMenuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
             </div>
+
           </div>
         </div>
       </div>

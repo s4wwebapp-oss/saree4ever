@@ -34,6 +34,7 @@ export default function AllProductsClient({ initialProducts, initialSearchParams
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const {
     search,
@@ -93,8 +94,24 @@ export default function AllProductsClient({ initialProducts, initialSearchParams
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
-      {/* Filters Sidebar */}
-      <aside className="lg:w-64 flex-shrink-0">
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden flex items-center justify-between mb-4">
+        <p className="text-sm text-gray-600">
+          Showing {products.length} product{products.length !== 1 ? 's' : ''}
+        </p>
+        <button
+          onClick={() => setIsFiltersOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors"
+        >
+          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          <span className="text-sm font-medium">Filters</span>
+        </button>
+      </div>
+
+      {/* Filters Sidebar - Desktop */}
+      <aside className="hidden lg:block lg:w-64 flex-shrink-0">
         <div className="sticky top-24">
           <FiltersSidebarEnhanced
             onFiltersChange={() => {
@@ -104,6 +121,39 @@ export default function AllProductsClient({ initialProducts, initialSearchParams
           />
         </div>
       </aside>
+
+      {/* Mobile Filters Drawer/Modal */}
+      {isFiltersOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setIsFiltersOpen(false)}
+          />
+          {/* Drawer */}
+          <div className="fixed inset-y-0 left-0 w-80 bg-white z-50 lg:hidden overflow-y-auto shadow-xl">
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
+              <h2 className="font-semibold text-lg">Filters</h2>
+              <button
+                onClick={() => setIsFiltersOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Close filters"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <FiltersSidebarEnhanced
+                onFiltersChange={() => {
+                  // Filters are managed internally by the component
+                }}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Products Grid */}
       <div className="flex-1">
@@ -123,7 +173,7 @@ export default function AllProductsClient({ initialProducts, initialSearchParams
           </div>
         ) : (
           <>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 hidden lg:flex items-center justify-between">
               <p className="text-sm text-gray-600">
                 Showing {products.length} product{products.length !== 1 ? 's' : ''}
               </p>
@@ -138,7 +188,7 @@ export default function AllProductsClient({ initialProducts, initialSearchParams
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {products.map((product) => (
                 <ProductCard
                   key={product.id}
