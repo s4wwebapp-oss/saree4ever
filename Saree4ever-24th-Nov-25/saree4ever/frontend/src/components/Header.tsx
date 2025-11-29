@@ -342,9 +342,9 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Menu Bar - Navigation Links (Collapses on scroll) */}
-      <div className={`bg-white border-b border-gray-200 transition-all duration-300 ${
-        isScrolled ? 'hidden' : 'block'
+      {/* Menu Bar - Navigation Links (Collapses on scroll) - Hidden on mobile */}
+      <div className={`bg-white border-b border-gray-200 transition-all duration-300 hidden md:block ${
+        isScrolled ? 'md:hidden' : ''
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center justify-center gap-4 md:gap-6 lg:gap-8 py-3 overflow-x-auto">
