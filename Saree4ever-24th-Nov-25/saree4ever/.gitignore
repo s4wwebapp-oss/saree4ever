@@ -32,7 +32,7 @@ Thumbs.db
 coverage/
 .nyc_output/
 
-
 # Exclude backup directories
 BACKUP COPY/
+../BACKUP COPY/
 ../../BACKUP COPY/
