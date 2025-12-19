@@ -270,7 +270,7 @@ export default async function ProductDetailPage({
                   product.length_m ? `${product.length_m}m length` : 'Standard 6m length',
                   product.blouse_included ? 'Blouse piece included' : 'Blouse piece available separately',
                   '100% Authentic',
-                  'Free shipping worldwide',
+                  'Free shipping across India',
                 ]}
               />
             )}

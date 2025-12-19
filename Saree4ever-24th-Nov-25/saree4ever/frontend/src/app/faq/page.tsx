@@ -26,7 +26,7 @@ const faqs: FAQ[] = [
   },
   {
     question: 'Do you ship internationally?',
-    answer: 'Yes! We ship worldwide with free shipping on orders above a certain value. International customers are responsible for any customs duties or taxes.',
+    answer: 'We currently ship across India with free shipping on all orders. We are working on expanding our shipping to other countries soon.',
   },
   {
     question: 'How do I care for my saree?',

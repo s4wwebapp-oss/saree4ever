@@ -103,7 +103,7 @@ export default function Header() {
         const mockAnnouncements: Announcement[] = [
           {
             id: 'mock-1',
-            text: 'FREE SHIPPING WORLDWIDE | COMPLIMENTARY FALLS & PICO',
+            text: 'FREE SHIPPING ALL INDIA | COMPLIMENTARY FALLS & PICO',
             link_url: null,
             link_target: '_self',
             is_active: true,

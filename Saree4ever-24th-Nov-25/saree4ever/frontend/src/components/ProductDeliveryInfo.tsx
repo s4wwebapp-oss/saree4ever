@@ -10,7 +10,7 @@ export default function ProductDeliveryInfo() {
           </svg>
           <div>
             <p className="font-medium text-sm">Free Shipping</p>
-            <p className="text-xs text-gray-600">Free shipping worldwide on all orders</p>
+            <p className="text-xs text-gray-600">Free shipping across India on all orders</p>
           </div>
         </div>
         <div className="flex items-start">

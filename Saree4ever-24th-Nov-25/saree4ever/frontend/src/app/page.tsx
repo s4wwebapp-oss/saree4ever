@@ -671,9 +671,9 @@ export default async function HomePage() {
             </div>
             <div className="text-center">
               <div className="text-5xl mb-4">🚚</div>
-              <h3 className="text-xl font-semibold mb-2">Worldwide Shipping</h3>
+              <h3 className="text-xl font-semibold mb-2">All India Shipping</h3>
               <p className="text-gray-300">
-                Free shipping worldwide with complimentary falls and pico. Your dream saree delivered safely
+                Free shipping across India with complimentary falls and pico. Your dream saree delivered safely
               </p>
             </div>
             <div className="text-center">
