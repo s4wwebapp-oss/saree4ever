@@ -36,7 +36,9 @@ exports.getProductBySlug = async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await productService.getProductById(id);
+    // Check if request is from admin (has Authorization header with Bearer token)
+    const isAdmin = req.headers.authorization?.startsWith('Bearer') && req.user?.role === 'admin';
+    const product = await productService.getProductById(id, isAdmin);
     
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });

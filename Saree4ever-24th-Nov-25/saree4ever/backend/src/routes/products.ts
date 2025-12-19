@@ -24,18 +24,18 @@ router.get('/', async (req, res) => {
       .order('created_at', { ascending: false })
       .range(Number(offset), Number(offset) + Number(limit) - 1);
 
-    // Only filter by active status if not admin
-    if (!isAdmin) {
-      // For public API, default to active only
-      query = query.eq('is_active', true);
+    // Filter by active status - default to active only for regular users
+    // This ensures deleted/inactive products are hidden from regular users
+    if (active === 'all') {
+      // Show all products (active and inactive) - admin only
+      // Don't filter by is_active
+    } else if (active === 'false') {
+      // Show only inactive products - admin only
+      query = query.eq('is_active', false);
     } else {
-      // Admin can see all, but can filter by active status
-      if (active === 'true') {
-        query = query.eq('is_active', true);
-      } else if (active === 'false') {
-        query = query.eq('is_active', false);
-      }
-      // If active is not set, show all products (no filter)
+      // Default: show only active products (for regular users and when active is undefined/null/'true')
+      // This ensures deleted products (is_active=false) are hidden
+      query = query.eq('is_active', true);
     }
 
     if (collection) {

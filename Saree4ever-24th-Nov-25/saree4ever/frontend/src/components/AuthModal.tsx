@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import NewUserWelcomeModal from './NewUserWelcomeModal';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -56,7 +58,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
           localStorage.setItem('token', signinResponse.token);
           onClose();
           router.refresh();
-          window.location.href = '/account';
+          // Show welcome modal for new users
+          setShowWelcomeModal(true);
         }
       } else {
         // Sign in
@@ -208,6 +211,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
           </p>
         </div>
       </div>
+
+      {/* New User Welcome Modal */}
+      <NewUserWelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => {
+          setShowWelcomeModal(false);
+          window.location.href = '/account';
+        }}
+      />
     </div>
   );
 }

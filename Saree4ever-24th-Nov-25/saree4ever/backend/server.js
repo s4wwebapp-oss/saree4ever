@@ -22,6 +22,10 @@ const announcementRoutes = require('./routes/announcement');
 const heroSlideRoutes = require('./routes/hero-slides');
 const testimonialRoutes = require('./routes/testimonials');
 const uploadRoutes = require('./routes/upload');
+const landingPageVideoRoutes = require('./routes/landing-page-video');
+const landingPageSectionRoutes = require('./routes/landing-page-sections');
+const menuConfigRoutes = require('./routes/menu-config');
+const socialMediaSettingsRoutes = require('./routes/social-media-settings');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -58,8 +62,8 @@ const corsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 
 // Serve uploaded files (temporary - use Supabase Storage in production)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -90,6 +94,7 @@ app.get('/api', (req, res) => {
       announcement: '/api/announcement',
       heroSlides: '/api/hero-slides',
       testimonials: '/api/testimonials',
+      landingPageVideo: '/api/landing-page-video',
       upload: '/api/upload',
       auth: '/api/auth',
     },
@@ -114,6 +119,10 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/hero-slides', heroSlideRoutes);
 app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/landing-page-video', landingPageVideoRoutes);
+app.use('/api/landing-page-sections', landingPageSectionRoutes);
+app.use('/api/menu-config', menuConfigRoutes);
+app.use('/api/social-media-settings', socialMediaSettingsRoutes);
 app.use('/api/upload', uploadRoutes);
 
 // 404 handler

@@ -1,15 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { api } from '@/lib/api';
+
+interface DiscountInfo {
+  eligible: boolean;
+  discount_code: string;
+  discount_percentage: number;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, total, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [discountInfo, setDiscountInfo] = useState<DiscountInfo | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -31,6 +39,32 @@ export default function CheckoutPage() {
     billing_country: 'India',
     customer_notes: '',
   });
+
+  // Check for user authentication and discount eligibility
+  useEffect(() => {
+    const checkDiscountEligibility = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const userResponse: any = await api.auth.getCurrentUser();
+        if (userResponse?.user?.id) {
+          setUserId(userResponse.user.id);
+          
+          // Check discount eligibility
+          const discountResponse: any = await api.auth.checkNewUserDiscount();
+          if (discountResponse?.eligible) {
+            setDiscountInfo(discountResponse);
+          }
+        }
+      } catch (error) {
+        // User not authenticated or error - silently fail
+        console.log('Not authenticated or discount not available');
+      }
+    };
+
+    checkDiscountEligibility();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -70,15 +104,16 @@ export default function CheckoutPage() {
         unit_price: item.price,
       }));
 
-      // Calculate totals
+      // Calculate totals (backend will verify and apply discount)
       const subtotal = total;
-      const tax_amount = subtotal * 0.18; // 18% GST
+      const tax_amount = subtotal * 0.18; // 18% GST (calculated on full amount)
       const shipping_amount = 0; // Free shipping
-      const discount_amount = 0;
+      const discount_amount = 0; // Backend will calculate and apply discount automatically for eligible users
       const total_amount = subtotal + tax_amount + shipping_amount - discount_amount;
 
       // Create order
       const orderData = {
+        user_id: userId || null, // Include user_id if authenticated
         email: formData.email,
         phone: formData.phone,
         shipping_name: formData.shipping_name,
@@ -133,9 +168,15 @@ export default function CheckoutPage() {
   }
 
   const subtotal = total;
-  const tax = subtotal * 0.18;
+  
+  // Calculate discount amount if eligible (for display - backend will verify and apply)
+  const discountAmount = discountInfo && discountInfo.eligible 
+    ? (subtotal * discountInfo.discount_percentage) / 100 
+    : 0;
+  
+  const tax = subtotal * 0.18; // Tax calculated on full amount (backend does the same)
   const shipping = 0;
-  const finalTotal = subtotal + tax + shipping;
+  const finalTotal = subtotal + tax + shipping - discountAmount;
 
   return (
     <div className="min-h-screen py-12">
@@ -328,6 +369,15 @@ export default function CheckoutPage() {
                   <span>Subtotal</span>
                   <span>₹{subtotal.toLocaleString()}</span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>
+                      Discount ({discountInfo?.discount_code}) 
+                      <span className="ml-1 text-xs">-{discountInfo?.discount_percentage}%</span>
+                    </span>
+                    <span>-₹{discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>Free</span>
@@ -342,6 +392,11 @@ export default function CheckoutPage() {
                     <span>₹{finalTotal.toLocaleString()}</span>
                   </div>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-800">
+                    <p>✨ Your new user discount will be automatically applied!</p>
+                  </div>
+                )}
               </div>
 
               {error && (

@@ -25,7 +25,7 @@
 
   /* Button styles */
   .btn-primary {
-    @apply bg-black text-white px-6 py-3 rounded-none font-medium hover:bg-gray-900 transition-colors;
+    @apply bg-black text-white px-4 py-2.5 rounded-none font-medium hover:bg-gray-900 transition-colors;
   }
 
   .btn-secondary {
@@ -33,7 +33,7 @@
   }
 
   .btn-outline {
-    @apply border border-black text-black px-4 py-2 rounded-none font-medium hover:bg-black hover:text-white transition-colors;
+    @apply border border-black text-black px-4 py-2.5 rounded-none font-medium hover:bg-black hover:text-white transition-colors;
   }
 
   /* Input styles */
@@ -110,6 +110,35 @@
 
   .prose img {
     @apply my-6 rounded-lg;
+  }
+
+  /* Logo styling - direct placement without container */
+  .logo-container {
+    padding: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Hover effects - only apply if logo-hover class is present */
+  .logo-container.logo-hover:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+
+  /* Logo image - maintains design integrity */
+  .logo-image {
+    filter: none;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    /* Preserve logo design - no filters that change appearance */
+  }
+
+  /* Responsive logo sizes */
+  @media (max-width: 768px) {
+    .logo-container {
+      padding: 0;
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 const { supabase } = require('../config/db');
-const { generateSlug } = require('../utils/helpers');
+const { generateSlug, generateProductSKU } = require('../utils/helpers');
 
 /**
  * Get all products with optional filters
@@ -150,8 +150,17 @@ exports.getAllProducts = async (filters = {}) => {
     `)
     .range(Number(offset), Number(offset) + Number(limit) - 1);
 
-  // Apply filters
-  if (active !== 'false') {
+  // Apply active filter - default to active only for regular users
+  // This ensures deleted/inactive products (is_active=false) are hidden from regular users
+  // Admins can explicitly set active='false' to see inactive products, or active='all' to see all
+  if (active === 'all') {
+    // Show all products (active and inactive) - admin only
+    // Don't filter by is_active
+  } else if (active === 'false') {
+    // Show only inactive products - admin only
+    query = query.eq('is_active', false);
+  } else {
+    // Default: show only active products (for regular users and when active is undefined/null/'true')
     query = query.eq('is_active', true);
   }
   
@@ -302,9 +311,11 @@ exports.getProductBySlug = async (slug) => {
 /**
  * Get single product by ID
  * Returns product with all collections, categories, and types
+ * @param {string} id - Product ID
+ * @param {boolean} isAdmin - Whether the request is from an admin (allows access to inactive products)
  */
-exports.getProductById = async (id) => {
-  const { data, error } = await supabase
+exports.getProductById = async (id, isAdmin = false) => {
+  let query = supabase
     .from('products')
     .select(`
       *,
@@ -313,8 +324,14 @@ exports.getProductById = async (id) => {
       product_types(type:types(*)),
       variants(*)
     `)
-    .eq('id', id)
-    .single();
+    .eq('id', id);
+  
+  // Filter by active status for non-admin users
+  if (!isAdmin) {
+    query = query.eq('is_active', true);
+  }
+  
+  const { data, error } = await query.single();
 
   if (error && error.code !== 'PGRST116') throw error;
   
@@ -376,6 +393,29 @@ exports.createProduct = async (productData) => {
 
   const slug = generateSlug(name);
 
+  // Auto-generate SKU if not provided
+  let finalSKU = sku;
+  if (!finalSKU) {
+    // Get type information for SKU generation
+    let typeSlug = null;
+    const typeIdToUse = type_id || (Array.isArray(type_ids) && type_ids.length > 0 ? type_ids[0] : null);
+    
+    if (typeIdToUse) {
+      const { data: typeData } = await supabase
+        .from('types')
+        .select('slug')
+        .eq('id', typeIdToUse)
+        .single();
+      
+      if (typeData) {
+        typeSlug = typeData.slug;
+      }
+    }
+    
+    // Generate SKU automatically
+    finalSKU = await generateProductSKU(supabase, name, typeIdToUse, typeSlug, color, null);
+  }
+
   // Create the product first
   const { data: product, error: productError } = await supabase
     .from('products')
@@ -393,7 +433,7 @@ exports.createProduct = async (productData) => {
       mrp: mrp || null,
       primary_image_url: primary_image_url || null,
       image_urls: Array.isArray(image_urls) ? image_urls : [],
-      sku: sku || null,
+      sku: finalSKU,
       tags: Array.isArray(tags) ? tags : [],
       // Taxonomy attributes
       color: color || null,

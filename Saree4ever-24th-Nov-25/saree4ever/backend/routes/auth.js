@@ -13,6 +13,7 @@ router.post('/signup', authController.signup);
 router.post('/signin', authController.signin);
 router.post('/signout', authenticate, authController.signout);
 router.get('/me', authenticate, authController.getCurrentUser);
+router.get('/new-user-discount', authenticate, authController.checkNewUserDiscountEligibility);
 
 // Admin routes (server-only)
 router.post('/admin/signin', authController.adminSignin);

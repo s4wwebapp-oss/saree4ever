@@ -1,10 +1,66 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
+
+interface SocialMediaSetting {
+  platform: string;
+  url: string | null;
+  is_visible: boolean;
+  display_order: number;
+}
 
 export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [socialMediaSettings, setSocialMediaSettings] = useState<SocialMediaSetting[]>([]);
+  const [loadingSocialMedia, setLoadingSocialMedia] = useState(true);
+
+  useEffect(() => {
+    fetchSocialMediaSettings();
+  }, []);
+
+  const fetchSocialMediaSettings = async () => {
+    try {
+      setLoadingSocialMedia(true);
+      const response: any = await api.socialMediaSettings.getAll();
+      setSocialMediaSettings(response.settings || []);
+    } catch (error: any) {
+      console.error('Error fetching social media settings:', error);
+      setMessage({ type: 'error', text: 'Failed to load social media settings' });
+    } finally {
+      setLoadingSocialMedia(false);
+    }
+  };
+
+  const handleSocialMediaUpdate = async (platform: string, updates: { url?: string; is_visible?: boolean }) => {
+    try {
+      setSaving(true);
+      setMessage(null);
+      await api.socialMediaSettings.updateSetting(platform, updates);
+      setMessage({ type: 'success', text: 'Social media settings updated successfully!' });
+      fetchSocialMediaSettings();
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Failed to update social media settings' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSocialMediaVisibilityToggle = (platform: string, currentVisibility: boolean) => {
+    handleSocialMediaUpdate(platform, { is_visible: !currentVisibility });
+  };
+
+  const getPlatformLabel = (platform: string) => {
+    const labels: Record<string, string> = {
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      twitter: 'Twitter/X',
+      youtube: 'YouTube',
+      pinterest: 'Pinterest',
+    };
+    return labels[platform] || platform.charAt(0).toUpperCase() + platform.slice(1);
+  };
 
   const handleSave = async (section: string) => {
     setSaving(true);
@@ -237,6 +293,71 @@ export default function AdminSettingsPage() {
                 {saving ? 'Saving...' : 'Save Email Settings'}
               </button>
             </div>
+          </div>
+
+          {/* Social Media Settings */}
+          <div className="bg-white border border-gray-200 p-6">
+            <h2 className="text-lg font-serif font-semibold mb-4">Social Media Settings</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Manage social media links and visibility in the header. Toggle visibility to show or hide each platform.
+            </p>
+            
+            {loadingSocialMedia ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600">Loading social media settings...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {socialMediaSettings.map((setting) => (
+                  <div key={setting.platform} className="border border-gray-200 p-4 rounded">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            {getPlatformLabel(setting.platform)}
+                          </label>
+                          <button
+                            onClick={() => handleSocialMediaVisibilityToggle(setting.platform, setting.is_visible)}
+                            disabled={saving}
+                            className={`px-3 py-1 text-xs font-medium rounded ${
+                              setting.is_visible
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            } disabled:opacity-50`}
+                          >
+                            {setting.is_visible ? 'Visible' : 'Hidden'}
+                          </button>
+                        </div>
+                        <input
+                          type="url"
+                          value={setting.url || ''}
+                          onChange={(e) => {
+                            const updatedSettings = socialMediaSettings.map((s) =>
+                              s.platform === setting.platform ? { ...s, url: e.target.value } : s
+                            );
+                            setSocialMediaSettings(updatedSettings);
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value !== setting.url) {
+                              handleSocialMediaUpdate(setting.platform, { url: e.target.value });
+                            }
+                          }}
+                          placeholder={`https://www.${setting.platform}.com/yourprofile`}
+                          className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black text-sm"
+                          disabled={saving}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {socialMediaSettings.length === 0 && (
+                  <div className="text-center py-8 text-gray-600">
+                    <p>No social media settings found. Please run the database migration first.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* System Information */}

@@ -144,6 +144,42 @@ exports.getCurrentUser = async (req, res) => {
 };
 
 /**
+ * Check if user is eligible for new user discount
+ */
+exports.checkNewUserDiscountEligibility = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    // Get user profile
+    const { data: profile, error } = await supabase
+      .from('user_profiles')
+      .select('new_user_discount_used')
+      .eq('id', req.user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+
+    // Check if user has already used the discount
+    const discountUsed = profile?.new_user_discount_used || false;
+
+    // New user discount configuration
+    const discountPercentage = 10; // 10% discount
+    const discountCode = 'WELCOME10';
+
+    res.json({
+      eligible: !discountUsed,
+      discount_code: discountCode,
+      discount_percentage: discountPercentage,
+      discount_amount: null, // Will be calculated based on order total
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
  * Admin sign in (server-only, for admin dashboard)
  */
 exports.adminSignin = async (req, res) => {
@@ -177,6 +213,7 @@ exports.adminSignin = async (req, res) => {
     res.json({
       message: 'Admin sign in successful',
       token,
+      supabaseSession: data.session, // Include Supabase session for direct uploads
       user: {
         id: data.user.id,
         email: data.user.email,

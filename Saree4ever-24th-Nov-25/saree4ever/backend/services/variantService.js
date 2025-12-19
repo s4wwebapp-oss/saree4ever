@@ -1,4 +1,5 @@
 const { supabase } = require('../config/db');
+const { generateVariantSKU } = require('../utils/helpers');
 
 /**
  * Get variants by product ID
@@ -53,12 +54,28 @@ exports.createVariant = async (variantData) => {
     throw new Error('product_id and name are required');
   }
 
+  // Auto-generate SKU if not provided
+  let finalSKU = sku;
+  if (!finalSKU) {
+    // Get product SKU for variant SKU generation
+    const { data: productData } = await supabase
+      .from('products')
+      .select('sku')
+      .eq('id', product_id)
+      .single();
+    
+    const productSKU = productData?.sku || null;
+    
+    // Generate variant SKU automatically
+    finalSKU = await generateVariantSKU(supabase, product_id, productSKU, null);
+  }
+
   const { data, error } = await supabase
     .from('variants')
     .insert({
       product_id,
       name,
-      sku: sku || null,
+      sku: finalSKU,
       price: price || null,
       compare_at_price: compare_at_price || null,
       color: color || null,

@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Preserve PNG transparency - don't force format conversion
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 };
 

@@ -17,6 +17,8 @@ const navItems = [
   { name: 'Collections', href: '/admin/collections', icon: '📁' },
   { name: 'Menu Config', href: '/admin/menu-config', icon: '📋' },
   { name: 'Hero Slides', href: '/admin/hero-slides', icon: '🖼️' },
+  { name: 'Landing Videos', href: '/admin/landing-page-video', icon: '🎥' },
+  { name: 'Page Sections', href: '/admin/landing-page-sections', icon: '👁️' },
   { name: 'Announcement', href: '/admin/announcement', icon: '📢' },
   { name: 'Blog/Stories', href: '/admin/blog', icon: '📝' },
   { name: 'Reels/Videos', href: '/admin/reels', icon: '🎬' },

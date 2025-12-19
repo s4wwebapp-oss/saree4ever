@@ -176,6 +176,7 @@ export const api = {
     adminSignin: (data: unknown) => post('/auth/admin/signin', data),
     signout: () => post('/auth/signout'),
     getCurrentUser: () => get('/auth/me'),
+    checkNewUserDiscount: () => get('/auth/new-user-discount'),
   },
 
   // Products
@@ -429,6 +430,35 @@ export const api = {
     create: (data: unknown) => post('/testimonials', data),
     update: (id: string, data: unknown) => put(`/testimonials/${id}`, data),
     delete: (id: string) => del(`/testimonials/${id}`),
+  },
+
+  landingPageVideo: {
+    getActive: () => get('/landing-page-video/active').catch(() => ({ videos: [] })),
+    getAll: () => get('/landing-page-video').catch(() => ({ videos: [] })),
+    getById: (id: string) => get(`/landing-page-video/${id}`),
+    create: (data: unknown) => post('/landing-page-video', data),
+    update: (id: string, data: unknown) => put(`/landing-page-video/${id}`, data),
+    delete: (id: string) => del(`/landing-page-video/${id}`),
+    reorder: (videoOrders: Array<{ id: string; display_order: number }>) => 
+      post('/landing-page-video/reorder', { videoOrders }),
+  },
+
+  landingPageSections: {
+    getVisibility: () => get('/landing-page-sections/visibility').catch(() => ({ visibility: {} })),
+    getAll: () => get('/landing-page-sections'),
+    updateVisibility: (sectionKey: string, isVisible: boolean) => 
+      put('/landing-page-sections/visibility', { section_key: sectionKey, is_visible: isVisible }),
+    bulkUpdateVisibility: (updates: Array<{ section_key: string; is_visible: boolean }>) => 
+      put('/landing-page-sections/visibility/bulk', { updates }),
+  },
+
+  socialMediaSettings: {
+    getVisibleLinks: () => get('/social-media-settings/links').catch(() => ({ links: [] })),
+    getAll: () => get('/social-media-settings'),
+    updateSetting: (platform: string, data: { url?: string; is_visible?: boolean; display_order?: number }) => 
+      put(`/social-media-settings/${platform}`, data),
+    bulkUpdate: (updates: Array<{ platform: string; url?: string; is_visible?: boolean; display_order?: number }>) => 
+      put('/social-media-settings/bulk/update', { updates }),
   },
 };
 

@@ -70,6 +70,12 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [types, setTypes] = useState<Type[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
+  
+  // Bulk actions state
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -249,6 +255,79 @@ export default function AdminProductsPage() {
     return product.variants.reduce((sum, v) => sum + (v.stock_quantity || 0), 0);
   };
 
+  // Bulk action handlers
+  const handleBulkSetFeatured = async () => {
+    if (selected.length === 0) return;
+    
+    setBulkLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const promises = selected.map(product =>
+        api.products.update(product.id, { is_featured: true })
+      );
+      
+      await Promise.all(promises);
+      setSuccess(`Successfully set ${selected.length} product(s) as featured`);
+      setSelected([]);
+      loadProducts();
+    } catch (err: any) {
+      setError(err.message || 'Failed to set products as featured');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkChangeCollection = async () => {
+    if (selected.length === 0 || !selectedCollectionId) return;
+    
+    setBulkLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const promises = selected.map(product =>
+        api.products.update(product.id, { collection_ids: [selectedCollectionId] })
+      );
+      
+      await Promise.all(promises);
+      setSuccess(`Successfully changed collection for ${selected.length} product(s)`);
+      setSelected([]);
+      setShowCollectionModal(false);
+      setSelectedCollectionId('');
+      loadProducts();
+    } catch (err: any) {
+      setError(err.message || 'Failed to change collection');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.length === 0) return;
+    
+    setBulkLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const promises = selected.map(product =>
+        api.products.delete(product.id)
+      );
+      
+      await Promise.all(promises);
+      setSuccess(`Successfully deleted ${selected.length} product(s)`);
+      setSelected([]);
+      setShowDeleteConfirm(false);
+      loadProducts();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete products');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   const columns = [
     {
       key: 'primary_image_url',
@@ -364,6 +443,30 @@ export default function AdminProductsPage() {
   if (action !== 'create') {
     return (
       <div className="space-y-6">
+        {/* Success/Error Messages */}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            {success}
+            <button
+              onClick={() => setSuccess(null)}
+              className="float-right text-green-700 hover:text-green-900"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
+            <button
+              onClick={() => setError(null)}
+              className="float-right text-red-700 hover:text-red-900"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -484,9 +587,98 @@ export default function AdminProductsPage() {
           <div className="border border-black p-4 bg-yellow-50 flex items-center justify-between">
             <span className="text-sm font-medium">{selected.length} products selected</span>
             <div className="flex items-center space-x-2">
-              <button className="btn-outline text-sm">Set Featured</button>
-              <button className="btn-outline text-sm">Change Collection</button>
-              <button className="btn-outline text-sm text-red-600">Delete</button>
+              <button 
+                onClick={handleBulkSetFeatured}
+                disabled={bulkLoading}
+                className="btn-outline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {bulkLoading ? 'Processing...' : 'Set Featured'}
+              </button>
+              <button 
+                onClick={() => setShowCollectionModal(true)}
+                disabled={bulkLoading}
+                className="btn-outline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Change Collection
+              </button>
+              <button 
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={bulkLoading}
+                className="btn-outline text-sm text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Collection Selection Modal */}
+        {showCollectionModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+              <h2 className="text-lg font-semibold mb-4">Change Collection</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Select a collection for {selected.length} product(s)
+              </p>
+              <select
+                value={selectedCollectionId}
+                onChange={(e) => setSelectedCollectionId(e.target.value)}
+                className="w-full border border-black px-3 py-2 mb-4"
+              >
+                <option value="">Select a collection...</option>
+                {listCollections.map((collection: any) => (
+                  <option key={collection.id} value={collection.id}>
+                    {collection.name}
+                  </option>
+                ))}
+              </select>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleBulkChangeCollection}
+                  disabled={!selectedCollectionId || bulkLoading}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkLoading ? 'Updating...' : 'Update'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCollectionModal(false);
+                    setSelectedCollectionId('');
+                  }}
+                  disabled={bulkLoading}
+                  className="btn-outline disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+              <h2 className="text-lg font-semibold mb-4 text-red-600">Confirm Delete</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Are you sure you want to delete {selected.length} product(s)? This action cannot be undone.
+              </p>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkLoading}
+                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkLoading ? 'Deleting...' : 'Delete'}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={bulkLoading}
+                  className="btn-outline disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}

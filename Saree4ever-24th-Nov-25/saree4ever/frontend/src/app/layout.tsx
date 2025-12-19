@@ -4,6 +4,7 @@ import "./globals.css";
 import ConditionalHeader from "@/components/ConditionalHeader";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import { CartProvider } from "@/contexts/CartContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,11 +32,13 @@ export default function RootLayout({
         className={`${inter.variable} ${playfair.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <CartProvider>
-          <ConditionalHeader />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <ConditionalFooter />
+          <WishlistProvider>
+            <ConditionalHeader />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <ConditionalFooter />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

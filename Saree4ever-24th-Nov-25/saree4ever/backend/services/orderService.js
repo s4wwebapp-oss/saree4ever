@@ -41,8 +41,25 @@ exports.createOrder = async (orderData) => {
   }
 
   // Calculate totals if not provided
-  const calculatedSubtotal = subtotal || items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-  const total_amount = calculatedSubtotal + tax_amount + shipping_amount - discount_amount;
+  let calculatedSubtotal = subtotal || items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+  let calculatedDiscountAmount = discount_amount;
+
+  // Check and apply new user discount if eligible
+  if (user_id && discount_amount === 0) {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('new_user_discount_used')
+      .eq('id', user_id)
+      .single();
+
+    if (profile && !profile.new_user_discount_used) {
+      // Apply 10% new user discount
+      const discountPercentage = 10;
+      calculatedDiscountAmount = (calculatedSubtotal * discountPercentage) / 100;
+    }
+  }
+
+  const total_amount = calculatedSubtotal + tax_amount + shipping_amount - calculatedDiscountAmount;
 
   // STEP 1: Reserve stock for all items BEFORE creating order
   for (const item of items) {
@@ -87,7 +104,7 @@ exports.createOrder = async (orderData) => {
       subtotal: calculatedSubtotal,
       tax_amount,
       shipping_amount,
-      discount_amount,
+      discount_amount: calculatedDiscountAmount,
       total_amount,
       payment_status: 'pending',
       status: 'pending', // STEP 2: Order created with status: Pending
@@ -242,6 +259,26 @@ exports.processPaymentSuccess = async (orderId, paymentData) => {
     .single();
 
   if (error) throw error;
+
+  // Mark new user discount as used if this was the user's first paid order with discount
+  if (order.user_id && updatedOrder.discount_amount > 0) {
+    // Check if this is their first paid order (discount only applies to first order)
+    const { data: previousOrders } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('user_id', order.user_id)
+      .eq('payment_status', 'paid')
+      .neq('id', orderId)
+      .limit(1);
+
+    // If no previous paid orders and discount was applied, mark discount as used
+    if (!previousOrders || previousOrders.length === 0) {
+      await supabase
+        .from('user_profiles')
+        .update({ new_user_discount_used: true })
+        .eq('id', order.user_id);
+    }
+  }
 
   // Add order event: Payment successful
   await addOrderEvent(orderId, 'payment_success', {
