@@ -6,3 +6,7 @@ NOTIFY pgrst, 'reload schema';
 
 -- Verify the notification was sent
 SELECT 'PostgREST schema cache refresh notification sent' AS status;
+
+
+
+

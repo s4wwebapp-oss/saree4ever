@@ -64,3 +64,7 @@ CREATE POLICY "Anyone can read active landing page video"
 CREATE POLICY "Admins can manage landing page video"
   ON landing_page_video FOR ALL
   USING (auth.role() = 'authenticated');
+
+
+
+

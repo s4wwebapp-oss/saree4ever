@@ -75,3 +75,7 @@ router.put('/:menuType', authenticate, isAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
+
+
+

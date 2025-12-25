@@ -45,3 +45,7 @@ SELECT
   with_check
 FROM pg_policies 
 WHERE tablename = 'landing_page_video';
+
+
+
+

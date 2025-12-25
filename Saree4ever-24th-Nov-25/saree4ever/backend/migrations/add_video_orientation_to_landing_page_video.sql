@@ -12,3 +12,7 @@ WHERE video_orientation IS NULL;
 
 -- Add comment
 COMMENT ON COLUMN landing_page_video.video_orientation IS 'Video orientation: horizontal (16:9) or vertical (9:16) for reels/shorts';
+
+
+
+

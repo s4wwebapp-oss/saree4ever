@@ -111,3 +111,7 @@ Once migration is complete:
 2. ✅ Storage bucket `landing-videos` is created (public)
 3. ✅ You can now use `/admin/landing-page-video` to manage videos
 4. ✅ Videos will appear on homepage after Quick Categories section
+
+
+
+

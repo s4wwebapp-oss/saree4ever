@@ -52,3 +52,7 @@ COMMENT ON TABLE social_media_settings IS 'Controls social media links and visib
 COMMENT ON COLUMN social_media_settings.platform IS 'Social media platform name (instagram, facebook, twitter, youtube, pinterest)';
 COMMENT ON COLUMN social_media_settings.url IS 'URL to the social media profile';
 COMMENT ON COLUMN social_media_settings.is_visible IS 'Whether the social media link should be displayed in the header';
+
+
+
+

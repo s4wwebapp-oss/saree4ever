@@ -143,3 +143,7 @@ The triggers will automatically generate SKUs for any products/variants created 
 ### Custom SKU Format Needed
 - Modify `generateSKUAbbreviation()` in `helpers.js` for different abbreviation rules
 - Update database functions in `add_auto_sku_generation.sql` for different format
+
+
+
+

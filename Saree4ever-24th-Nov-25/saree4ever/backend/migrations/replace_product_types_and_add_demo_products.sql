@@ -596,3 +596,7 @@ BEGIN
   RAISE NOTICE 'Migration completed successfully!';
   RAISE NOTICE 'Created 5 types and 15 products (3 per type) with variants (quantity 10 each)';
 END $$;
+
+
+
+

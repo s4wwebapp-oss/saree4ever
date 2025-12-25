@@ -15,3 +15,7 @@ router.put('/visibility', landingPageSectionController.updateSectionVisibility);
 router.put('/visibility/bulk', landingPageSectionController.bulkUpdateVisibility);
 
 module.exports = router;
+
+
+
+

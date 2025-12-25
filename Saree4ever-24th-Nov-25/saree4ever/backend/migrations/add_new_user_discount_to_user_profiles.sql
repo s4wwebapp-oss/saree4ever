@@ -9,3 +9,7 @@ COMMENT ON COLUMN user_profiles.new_user_discount_used IS 'Tracks if the user ha
 
 -- Create index for efficient queries
 CREATE INDEX IF NOT EXISTS idx_user_profiles_new_user_discount_used ON user_profiles(new_user_discount_used);
+
+
+
+

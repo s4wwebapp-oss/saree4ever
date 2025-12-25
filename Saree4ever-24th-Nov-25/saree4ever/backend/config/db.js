@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const { Pool } = require('pg');
 
 // Supabase client configuration
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -20,22 +19,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 // Create Supabase client with anon key (for public operations)
 const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
-
-// Direct PostgreSQL connection pool (bypasses PostgREST schema cache)
-let pgPool = null;
-if (process.env.DATABASE_URL) {
-  try {
-    pgPool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      max: 5, // Maximum number of clients in the pool
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
-    });
-    console.log('✅ Direct PostgreSQL connection pool created');
-  } catch (error) {
-    console.warn('⚠️ Could not create PostgreSQL pool:', error.message);
-  }
-}
 
 // Prisma client (optional - only initialize if DATABASE_URL is set)
 let prisma = null;
@@ -92,6 +75,5 @@ module.exports = {
   supabase,
   supabaseAnon,
   prisma,
-  pgPool,
 };
 

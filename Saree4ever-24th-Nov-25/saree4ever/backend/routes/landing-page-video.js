@@ -18,3 +18,7 @@ router.delete('/:id', landingPageVideoController.deleteVideo);
 router.post('/reorder', landingPageVideoController.reorderVideos);
 
 module.exports = router;
+
+
+
+

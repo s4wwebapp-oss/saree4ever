@@ -59,3 +59,7 @@ CREATE INDEX IF NOT EXISTS idx_landing_page_sections_visible ON landing_page_sec
 COMMENT ON TABLE landing_page_sections IS 'Controls visibility of sections on the landing page';
 COMMENT ON COLUMN landing_page_sections.section_key IS 'Unique identifier for the section (e.g., quick_categories, featured_products)';
 COMMENT ON COLUMN landing_page_sections.is_visible IS 'Whether the section should be displayed on the landing page';
+
+
+
+

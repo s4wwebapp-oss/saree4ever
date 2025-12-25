@@ -157,3 +157,7 @@ COMMENT ON FUNCTION generate_product_sku IS 'Automatically generates a unique SK
 COMMENT ON FUNCTION generate_variant_sku IS 'Automatically generates a unique SKU for variants based on product SKU';
 COMMENT ON FUNCTION auto_generate_product_sku IS 'Trigger function to auto-generate product SKU on insert';
 COMMENT ON FUNCTION auto_generate_variant_sku IS 'Trigger function to auto-generate variant SKU on insert';
+
+
+
+

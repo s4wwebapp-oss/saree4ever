@@ -95,3 +95,7 @@ GRANT EXECUTE ON FUNCTION bulk_update_landing_page_sections_visibility(JSONB) TO
 
 -- Refresh PostgREST schema cache
 NOTIFY pgrst, 'reload schema';
+
+
+
+

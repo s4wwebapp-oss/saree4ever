@@ -12,3 +12,7 @@ router.put('/:platform', authenticate, isAdmin, socialMediaSettingsController.up
 router.put('/bulk/update', authenticate, isAdmin, socialMediaSettingsController.bulkUpdate);
 
 module.exports = router;
+
+
+
+

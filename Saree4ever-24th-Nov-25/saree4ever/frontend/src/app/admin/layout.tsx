@@ -77,10 +77,6 @@ export default function AdminLayoutWrapper({
           localStorage.setItem('admin_token', data.token);
           localStorage.setItem('token', data.token);
           localStorage.setItem('admin_auth', 'true');
-          // Store Supabase session for direct uploads
-          if (data.supabaseSession) {
-            localStorage.setItem('supabase_session', JSON.stringify(data.supabaseSession));
-          }
           setAuthenticated(true);
         } else {
           alert('Failed to get authentication token');

@@ -14,3 +14,7 @@ ON CONFLICT (slug) DO UPDATE SET
 SELECT name, slug, description FROM types 
 WHERE slug IN ('japan-satin', 'ho-silk', 'chiffon', 'cotton', 'satin')
 ORDER BY name;
+
+
+
+

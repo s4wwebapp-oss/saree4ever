@@ -324,3 +324,7 @@ WHERE slug IN ('old-collection-1', 'old-collection-2', 'seasonal-collection');
 - `backend/services/collectionService.js`
 - `backend/services/categoryService.js`
 - `backend/services/typeService.js`
+
+
+
+
