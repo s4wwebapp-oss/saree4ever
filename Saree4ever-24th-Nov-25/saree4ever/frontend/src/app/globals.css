@@ -218,3 +218,7 @@
     transform: translateY(0);
   }
 }
+
+body.coming-soon-active header {
+  display: none !important;
+}

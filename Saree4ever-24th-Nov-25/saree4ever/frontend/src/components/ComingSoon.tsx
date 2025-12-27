@@ -28,6 +28,14 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    // Hide the global navigation while the coming soon experience is active
+    document.body.classList.add('coming-soon-active');
+    return () => {
+      document.body.classList.remove('coming-soon-active');
+    };
+  }, []);
+
   // Filter active media
   const activeMedia = media.filter(m => m);
 
