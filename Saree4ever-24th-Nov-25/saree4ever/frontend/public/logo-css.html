@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saree4ever Logo - CSS Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 3rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin: 2rem 0 1rem;
+            font-size: 1.5rem;
+        }
+
+        .example-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+
+        /* CSS Logo Container */
+        .logo-css-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .logo-css-container:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+
+        /* AREE text - inline with S */
+        .logo-aree {
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(212, 175, 55, 0.25);
+            align-self: flex-start;
+        }
+
+        /* Main logo: AREE + S + 4EVER (horizontal) */
+        .logo-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-weight: 700;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), 0 0 12px rgba(212, 175, 55, 0.4);
+            gap: 0.2em;
+        }
+
+        /* Ornate S */
+        .logo-s {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-weight: 900;
+            font-style: italic;
+            display: inline-block;
+            transform: rotate(-5deg);
+            background: linear-gradient(135deg, #D4AF37, #FFD700, #D4AF37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* 4EVER */
+        .logo-4ever {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, #D4AF37, #FFD700, #D4AF37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Bottom tagline */
+        .logo-tagline {
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            text-transform: none;
+            line-height: 1.2;
+            font-style: italic;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 6px rgba(212, 175, 55, 0.25);
+        }
+
+        /* Size Presets - Horizontal Layout (Wider, Less Tall) */
+        .logo-small {
+            width: 160px;
+            height: 40px;
+        }
+        .logo-small .logo-aree { font-size: 0.375rem; padding-top: 0.1125rem; }
+        .logo-small .logo-s { font-size: 1.2rem; }
+        .logo-small .logo-4ever { font-size: 0.825rem; }
+        .logo-small .logo-tagline { font-size: 0.225rem; margin-top: 0.0375rem; }
+
+        .logo-medium {
+            width: 280px;
+            height: 60px;
+        }
+        .logo-medium .logo-aree { font-size: 0.6rem; padding-top: 0.18rem; }
+        .logo-medium .logo-s { font-size: 1.92rem; }
+        .logo-medium .logo-4ever { font-size: 1.32rem; }
+        .logo-medium .logo-tagline { font-size: 0.36rem; margin-top: 0.06rem; }
+
+        .logo-large {
+            width: 360px;
+            height: 72px;
+        }
+        .logo-large .logo-aree { font-size: 0.75rem; padding-top: 0.225rem; }
+        .logo-large .logo-s { font-size: 2.4rem; }
+        .logo-large .logo-4ever { font-size: 1.65rem; }
+        .logo-large .logo-tagline { font-size: 0.45rem; margin-top: 0.075rem; }
+
+        .logo-xlarge {
+            width: 480px;
+            height: 90px;
+        }
+        .logo-xlarge .logo-aree { font-size: 0.9375rem; padding-top: 0.28125rem; }
+        .logo-xlarge .logo-s { font-size: 3rem; }
+        .logo-xlarge .logo-4ever { font-size: 2.0625rem; }
+        .logo-xlarge .logo-tagline { font-size: 0.5625rem; margin-top: 0.09375rem; }
+
+        /* Custom size example */
+        .logo-custom {
+            width: 600px;
+            height: 120px;
+        }
+        .logo-custom .logo-aree { font-size: 1.25rem; padding-top: 0.375rem; }
+        .logo-custom .logo-s { font-size: 4rem; }
+        .logo-custom .logo-4ever { font-size: 2.75rem; }
+        .logo-custom .logo-tagline { font-size: 0.75rem; margin-top: 0.125rem; }
+
+        /* Color variations */
+        .logo-gold { color: #D4AF37; }
+        .logo-silver { color: #C0C0C0; }
+        .logo-black { color: #1a1a1a; }
+        .logo-white { color: #ffffff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+
+        /* Background variations */
+        .bg-white { background-color: white; }
+        .bg-black { background-color: #1a1a1a; }
+        .bg-transparent { background-color: transparent; }
+        .bg-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .code-block {
+            background: #1a1a1a;
+            color: #f0f0f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 1rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .code-block code {
+            color: #f0f0f0;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .demo-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .demo-item p {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Saree4ever Logo - CSS Version</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 2rem;">
+            Pure HTML/CSS logo - No images required, fully scalable and customizable
+        </p>
+
+        <!-- Example 1: Size Presets -->
+        <div class="example-section">
+            <h2>1. Size Presets</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <div class="logo-css-container logo-small logo-gold bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p>Small (160×40px)</p>
+                </div>
+
+                <div class="demo-item">
+                    <div class="logo-css-container logo-medium logo-gold bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p>Medium (280×60px)</p>
+                </div>
+
+                <div class="demo-item">
+                    <div class="logo-css-container logo-large logo-gold bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p>Large (360×72px)</p>
+                </div>
+
+                <div class="demo-item">
+                    <div class="logo-css-container logo-xlarge logo-gold bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p>XLarge (480×90px)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 2: Color Variations -->
+        <div class="example-section">
+            <h2>2. Color Variations</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <div class="logo-css-container logo-medium logo-gold bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p>Gold (Default)</p>
+                </div>
+
+                <div class="demo-item bg-black">
+                    <div class="logo-css-container logo-medium logo-white bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p style="color: white;">White on Black</p>
+                </div>
+
+                <div class="demo-item">
+                    <div class="logo-css-container logo-medium logo-black bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p>Black</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 3: Background Variations -->
+        <div class="example-section">
+            <h2>3. Background Variations</h2>
+            <div class="demo-grid">
+                <div class="demo-item bg-white">
+                    <div class="logo-css-container logo-medium logo-gold bg-white">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p>White Background</p>
+                </div>
+
+                <div class="demo-item bg-black">
+                    <div class="logo-css-container logo-medium logo-gold bg-black">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p style="color: white;">Black Background</p>
+                </div>
+
+                <div class="demo-item bg-gradient">
+                    <div class="logo-css-container logo-medium logo-white bg-transparent">
+                        <div class="logo-main">
+                            <span class="logo-aree">AREE</span>
+                            <span class="logo-s">S</span>
+                            <span class="logo-4ever">4EVER</span>
+                        </div>
+                        <div class="logo-tagline">Drape Your Dreams</div>
+                    </div>
+                    <p style="color: white;">Gradient Background</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 4: Custom Size -->
+        <div class="example-section">
+            <h2>4. Custom Size</h2>
+            <div style="text-align: center; padding: 2rem;">
+                <div class="logo-css-container logo-custom logo-gold bg-transparent">
+                    <div class="logo-main">
+                        <span class="logo-aree">AREE</span>
+                        <span class="logo-s">S</span>
+                        <span class="logo-4ever">4EVER</span>
+                    </div>
+                    <div class="logo-tagline">Drape Your Dreams</div>
+                </div>
+                <p style="margin-top: 1rem;">Custom Size (600×120px)</p>
+            </div>
+        </div>
+
+        <!-- Example 5: HTML Code -->
+        <div class="example-section">
+            <h2>5. HTML Code</h2>
+            <div class="code-block">
+<code>&lt;!-- Basic Logo Structure (Horizontal Layout) --&gt;
+&lt;div class="logo-css-container logo-medium logo-gold bg-transparent"&gt;
+    &lt;div class="logo-main"&gt;
+        &lt;span class="logo-aree"&gt;AREE&lt;/span&gt;
+        &lt;span class="logo-s"&gt;S&lt;/span&gt;
+        &lt;span class="logo-4ever"&gt;4EVER&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="logo-tagline"&gt;Drape Your Dreams&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Size Classes: logo-small (160×40px), logo-medium (280×60px), logo-large (360×72px), logo-xlarge (480×90px) --&gt;
+&lt;!-- Color Classes: logo-gold, logo-silver, logo-black, logo-white --&gt;
+&lt;!-- Background Classes: bg-white, bg-black, bg-transparent --&gt;</code>
+            </div>
+        </div>
+
+        <!-- Example 6: CSS Customization -->
+        <div class="example-section">
+            <h2>6. CSS Customization</h2>
+            <div class="code-block">
+<code>/* Change logo color */
+.logo-gold { color: #D4AF37; }
+.logo-silver { color: #C0C0C0; }
+.logo-black { color: #1a1a1a; }
+
+/* Custom size (Horizontal - Wider, Less Tall) */
+.logo-custom {
+    width: 600px;
+    height: 120px;
+}
+.logo-custom .logo-aree { font-size: 1.25rem; padding-top: 0.375rem; }
+.logo-custom .logo-s { font-size: 4rem; }
+.logo-custom .logo-4ever { font-size: 2.75rem; }
+.logo-custom .logo-tagline { font-size: 0.75rem; margin-top: 0.125rem; }</code>
+            </div>
+        </div>
+
+        <!-- Example 7: Responsive Usage -->
+        <div class="example-section">
+            <h2>7. Responsive Usage</h2>
+            <div class="code-block">
+<code>&lt;style&gt;
+/* Mobile (Horizontal Layout) */
+.logo-responsive {
+    width: 160px;
+    height: 40px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .logo-responsive {
+        width: 280px;
+        height: 60px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .logo-responsive {
+        width: 360px;
+        height: 72px;
+    }
+}
+&lt;/style&gt;
+
+&lt;div class="logo-css-container logo-responsive logo-gold bg-transparent"&gt;
+    &lt;!-- Logo content --&gt;
+&lt;/div&gt;</code>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

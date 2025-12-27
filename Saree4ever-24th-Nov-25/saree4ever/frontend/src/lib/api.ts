@@ -460,6 +460,19 @@ export const api = {
     bulkUpdate: (updates: Array<{ platform: string; url?: string; is_visible?: boolean; display_order?: number }>) => 
       put('/social-media-settings/bulk/update', { updates }),
   },
+
+  comingSoon: {
+    getSettings: () => get('/coming-soon/settings').catch(() => ({ settings: { is_enabled: false } })),
+    updateSettings: (data: { is_enabled?: boolean; title?: string; subtitle?: string }) => 
+      put('/coming-soon/settings', data),
+    getMedia: () => get('/coming-soon/media').catch(() => ({ media: [] })),
+    getAllMedia: () => get('/coming-soon/media/all'),
+    createMedia: (data: unknown) => post('/coming-soon/media', data),
+    updateMedia: (id: string, data: unknown) => put(`/coming-soon/media/${id}`, data),
+    deleteMedia: (id: string) => del(`/coming-soon/media/${id}`),
+    reorderMedia: (mediaOrders: Array<{ id: string; display_order: number }>) => 
+      put('/coming-soon/media/reorder', { mediaOrders }),
+  },
 };
 
 export default api;

@@ -7,6 +7,7 @@ import ExpandableCategoryGrid from '@/components/ExpandableCategoryGrid';
 import ReelsSection from '@/components/ReelsSection';
 import LandingPageVideoSection from '@/components/LandingPageVideoSection';
 import ReviewsSection from '@/components/ReviewsSection';
+import ComingSoon from '@/components/ComingSoon';
 
 interface Product {
   id: string;
@@ -327,7 +328,45 @@ async function getSectionVisibility(): Promise<Record<string, boolean>> {
   }
 }
 
+async function getComingSoonSettings(): Promise<{ is_enabled: boolean; title?: string; subtitle?: string }> {
+  try {
+    const response: any = await api.comingSoon.getSettings();
+    return response.settings || { is_enabled: false };
+  } catch (error) {
+    console.error('Error fetching coming soon settings:', error);
+    return { is_enabled: false };
+  }
+}
+
+async function getComingSoonMedia(): Promise<any[]> {
+  try {
+    const response: any = await api.comingSoon.getMedia();
+    return response.media || [];
+  } catch (error) {
+    console.error('Error fetching coming soon media:', error);
+    return [];
+  }
+}
+
 export default async function HomePage() {
+  // Check coming soon mode first
+  const [comingSoonSettings, comingSoonMedia] = await Promise.all([
+    getComingSoonSettings(),
+    getComingSoonMedia(),
+  ]);
+
+  // If coming soon is enabled, show coming soon page
+  if (comingSoonSettings.is_enabled) {
+    return (
+      <ComingSoon
+        title={comingSoonSettings.title}
+        subtitle={comingSoonSettings.subtitle}
+        media={comingSoonMedia}
+      />
+    );
+  }
+
+  // Otherwise, show regular landing page
   const [heroSlides, featuredProducts, testimonials, quickCategories, allCategories, reels, stories, videos, collections, sectionVisibility] = await Promise.all([
     getHeroSlides(),
     getFeaturedProducts(),

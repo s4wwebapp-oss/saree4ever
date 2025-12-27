@@ -10,14 +10,27 @@ interface SocialMediaSetting {
   display_order: number;
 }
 
+interface ComingSoonSettings {
+  is_enabled: boolean;
+  title?: string;
+  subtitle?: string;
+}
+
 export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [socialMediaSettings, setSocialMediaSettings] = useState<SocialMediaSetting[]>([]);
   const [loadingSocialMedia, setLoadingSocialMedia] = useState(true);
+  const [comingSoonSettings, setComingSoonSettings] = useState<ComingSoonSettings>({
+    is_enabled: false,
+    title: 'Coming Soon',
+    subtitle: 'We are working on something amazing!',
+  });
+  const [loadingComingSoon, setLoadingComingSoon] = useState(true);
 
   useEffect(() => {
     fetchSocialMediaSettings();
+    fetchComingSoonSettings();
   }, []);
 
   const fetchSocialMediaSettings = async () => {
@@ -60,6 +73,51 @@ export default function AdminSettingsPage() {
       pinterest: 'Pinterest',
     };
     return labels[platform] || platform.charAt(0).toUpperCase() + platform.slice(1);
+  };
+
+  const fetchComingSoonSettings = async () => {
+    try {
+      setLoadingComingSoon(true);
+      const response: any = await api.comingSoon.getSettings();
+      setComingSoonSettings(response.settings || { is_enabled: false });
+    } catch (error: any) {
+      console.error('Error fetching coming soon settings:', error);
+      setMessage({ type: 'error', text: 'Failed to load coming soon settings' });
+    } finally {
+      setLoadingComingSoon(false);
+    }
+  };
+
+  const handleComingSoonToggle = async () => {
+    try {
+      setSaving(true);
+      setMessage(null);
+      const newValue = !comingSoonSettings.is_enabled;
+      await api.comingSoon.updateSettings({ is_enabled: newValue });
+      setComingSoonSettings(prev => ({ ...prev, is_enabled: newValue }));
+      setMessage({ 
+        type: 'success', 
+        text: `Coming soon page ${newValue ? 'enabled' : 'disabled'} successfully!` 
+      });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Failed to update coming soon settings' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleComingSoonUpdate = async (updates: { title?: string; subtitle?: string }) => {
+    try {
+      setSaving(true);
+      setMessage(null);
+      await api.comingSoon.updateSettings(updates);
+      setComingSoonSettings(prev => ({ ...prev, ...updates }));
+      setMessage({ type: 'success', text: 'Coming soon settings updated successfully!' });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Failed to update coming soon settings' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async (section: string) => {
@@ -354,6 +412,93 @@ export default function AdminSettingsPage() {
                 {socialMediaSettings.length === 0 && (
                   <div className="text-center py-8 text-gray-600">
                     <p>No social media settings found. Please run the database migration first.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Coming Soon Settings */}
+          <div className="bg-white border border-gray-200 p-6">
+            <h2 className="text-lg font-serif font-semibold mb-4">Coming Soon Page</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Toggle between the regular landing page and a coming soon page with full-page videos/images.
+            </p>
+            
+            {loadingComingSoon ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600">Loading coming soon settings...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Enable Coming Soon Page
+                    </label>
+                    <p className="text-xs text-gray-500">
+                      When enabled, visitors will see the coming soon page instead of the regular landing page.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleComingSoonToggle}
+                    disabled={saving}
+                    className={`px-4 py-2 text-sm font-medium rounded transition-colors ${
+                      comingSoonSettings.is_enabled
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    } disabled:opacity-50`}
+                  >
+                    {comingSoonSettings.is_enabled ? 'Enabled' : 'Disabled'}
+                  </button>
+                </div>
+
+                {comingSoonSettings.is_enabled && (
+                  <div className="space-y-4 p-4 border border-gray-200 rounded bg-gray-50">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        value={comingSoonSettings.title || ''}
+                        onChange={(e) => setComingSoonSettings(prev => ({ ...prev, title: e.target.value }))}
+                        onBlur={(e) => {
+                          if (e.target.value !== comingSoonSettings.title) {
+                            handleComingSoonUpdate({ title: e.target.value });
+                          }
+                        }}
+                        placeholder="Coming Soon"
+                        className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black text-sm"
+                        disabled={saving}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Subtitle
+                      </label>
+                      <input
+                        type="text"
+                        value={comingSoonSettings.subtitle || ''}
+                        onChange={(e) => setComingSoonSettings(prev => ({ ...prev, subtitle: e.target.value }))}
+                        onBlur={(e) => {
+                          if (e.target.value !== comingSoonSettings.subtitle) {
+                            handleComingSoonUpdate({ subtitle: e.target.value });
+                          }
+                        }}
+                        placeholder="We are working on something amazing!"
+                        className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black text-sm"
+                        disabled={saving}
+                      />
+                    </div>
+                    <div className="pt-2">
+                      <a
+                        href="/admin/coming-soon"
+                        className="text-sm text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Manage Coming Soon Videos & Images →
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>
