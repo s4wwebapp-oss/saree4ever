@@ -43,9 +43,22 @@ const DEFAULT_POSTER_DETAILS = {
 // Event date: January 4, 2026 at 10:00 AM IST (UTC+5:30) = 04:30 UTC
 const EVENT_DATE = new Date('2026-01-04T04:30:00.000Z');
 
+// Counter start date: December 26, 2025 at 3:50 PM IST (UTC+5:30) = 10:20 UTC
+const COUNTER_START_DATE = new Date('2025-12-26T10:20:00.000Z');
+
+// Calculate time left - returns null if counter hasn't started yet
 const getTimeLeft = () => {
   const now = Date.now();
-  const diff = Math.max(EVENT_DATE.getTime() - now, 0);
+  const startTime = COUNTER_START_DATE.getTime();
+  const eventTime = EVENT_DATE.getTime();
+  
+  // If counter hasn't started yet, return null
+  if (now < startTime) {
+    return null;
+  }
+  
+  // Calculate time remaining until event
+  const diff = Math.max(eventTime - now, 0);
 
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -55,10 +68,20 @@ const getTimeLeft = () => {
   };
 };
 
+// Get initial countdown value for SSR (server-side)
+// This ensures server and client render the same initial value
+const getInitialCountdown = () => {
+  // On server, we can't know the exact time, so return zeros
+  // The client will update it after hydration
+  return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+};
+
 export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon Online Shopping will be on live', media = [] }: ComingSoonProps) {
   const [isMuted, setIsMuted] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const [countdown, setCountdown] = useState(getTimeLeft());
+  // Initialize with fixed server-side value to avoid hydration mismatch
+  const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(getInitialCountdown());
+  const [isMounted, setIsMounted] = useState(false);
 
 
   // Filter active media
@@ -87,13 +110,24 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
     { label: 'Contact', entries: [{ text: DEFAULT_POSTER_DETAILS.contact }] },
   ];
 
+  // Set initial countdown on client mount to avoid hydration mismatch
   useEffect(() => {
+    setIsMounted(true);
+    const timeLeft = getTimeLeft();
+    setCountdown(timeLeft);
+  }, []);
+
+  // Update countdown every second
+  useEffect(() => {
+    if (!isMounted) return;
+    
     const interval = setInterval(() => {
-      setCountdown(getTimeLeft());
+      const timeLeft = getTimeLeft();
+      setCountdown(timeLeft);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
     document.body.classList.add('coming-soon-mode');
@@ -133,19 +167,25 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
         <div className="text-center px-4 max-w-5xl w-full">
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4">{title}</h1>
           <p className="text-lg sm:text-xl md:text-2xl mb-8">{subtitle}</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3 sm:gap-4 text-white/90">
-            {[
-              { label: 'Days', value: countdown.days },
-              { label: 'Hours', value: countdown.hours },
-              { label: 'Minutes', value: countdown.minutes },
-              { label: 'Seconds', value: countdown.seconds },
-            ].map((unit) => (
-              <div key={unit.label} className="min-w-[60px] sm:min-w-[70px]">
-                <div className="text-2xl sm:text-3xl font-bold">{String(unit.value).padStart(2, '0')}</div>
-                <div className="text-xs uppercase tracking-[0.3em] text-white/70">{unit.label}</div>
-              </div>
-            ))}
-          </div>
+          {countdown !== null ? (
+            <div className="mt-6 flex flex-wrap justify-center gap-3 sm:gap-4 text-white/90">
+              {[
+                { label: 'Days', value: countdown.days },
+                { label: 'Hours', value: countdown.hours },
+                { label: 'Minutes', value: countdown.minutes },
+                { label: 'Seconds', value: countdown.seconds },
+              ].map((unit) => (
+                <div key={unit.label} className="min-w-[60px] sm:min-w-[70px]">
+                  <div className="text-2xl sm:text-3xl font-bold">{String(unit.value).padStart(2, '0')}</div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-white/70">{unit.label}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6 text-lg sm:text-xl text-white/90">
+              Countdown starts on December 26, 2025 at 3:50 PM IST
+            </div>
+          )}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto text-left">
             {detailBlocks.map((block) => (
               <div
@@ -255,19 +295,25 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
                 {/* Countdown Timer - Only show on first section */}
                 {index === 0 && (
                   <>
-                    <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-white/90">
-                      {[
-                        { label: 'Days', value: countdown.days },
-                        { label: 'Hours', value: countdown.hours },
-                        { label: 'Minutes', value: countdown.minutes },
-                        { label: 'Seconds', value: countdown.seconds },
-                      ].map((unit) => (
-                        <div key={unit.label} className="min-w-[60px] sm:min-w-[70px] text-center">
-                          <div className="text-2xl sm:text-3xl md:text-4xl font-bold">{String(unit.value).padStart(2, '0')}</div>
-                          <div className="text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-white/70">{unit.label}</div>
-                        </div>
-                      ))}
-                    </div>
+                    {countdown !== null ? (
+                      <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-white/90">
+                        {[
+                          { label: 'Days', value: countdown.days },
+                          { label: 'Hours', value: countdown.hours },
+                          { label: 'Minutes', value: countdown.minutes },
+                          { label: 'Seconds', value: countdown.seconds },
+                        ].map((unit) => (
+                          <div key={unit.label} className="min-w-[60px] sm:min-w-[70px] text-center">
+                            <div className="text-2xl sm:text-3xl md:text-4xl font-bold">{String(unit.value).padStart(2, '0')}</div>
+                            <div className="text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-white/70">{unit.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="mt-6 sm:mt-8 text-lg sm:text-xl md:text-2xl text-white/90">
+                        Countdown starts on December 26, 2025 at 3:50 PM IST
+                      </div>
+                    )}
 
                     {/* Detail Blocks - Only show on first section */}
                     <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
