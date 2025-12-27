@@ -35,12 +35,27 @@ const DEFAULT_POSTER_DETAILS = {
   contact: '+91 8088 393915',
 };
 
-export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are working on something amazing!', media = [] }: ComingSoonProps) {
+const EVENT_DATE = new Date('2026-01-04T04:30:00.000Z');
+
+const getTimeLeft = () => {
+  const now = Date.now();
+  const diff = Math.max(EVENT_DATE.getTime() - now, 0);
+
+  return {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / (1000 * 60)) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+};
+
+export default function ComingSoon({ title = 'Opening Soon', subtitle = 'Visit our store and experience the Saree4ever collection.', media = [] }: ComingSoonProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [countdown, setCountdown] = useState(getTimeLeft());
 
 
   // Filter active media
@@ -48,9 +63,17 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
   const detailBlocks = [
     { label: 'Date & Time', lines: [DEFAULT_POSTER_DETAILS.dateLine, DEFAULT_POSTER_DETAILS.timeLine] },
     { label: 'Venue', lines: DEFAULT_POSTER_DETAILS.venue },
-    { label: 'Follow', lines: [`Instagram ${DEFAULT_POSTER_DETAILS.instagram}`, `Explore ${DEFAULT_POSTER_DETAILS.website}`] },
+    { label: 'Follow', lines: [{ text: `Instagram ${DEFAULT_POSTER_DETAILS.instagram}`, href: 'https://instagram.com/saree4ever' }] },
     { label: 'Contact', lines: [DEFAULT_POSTER_DETAILS.contact] },
   ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown(getTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     // Initialize video refs array
@@ -185,6 +208,19 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
         <div className="text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{title}</h1>
           <p className="text-xl md:text-2xl">{subtitle}</p>
+          <div className="mt-6 flex justify-center gap-4 text-white/90">
+            {[
+              { label: 'Days', value: countdown.days },
+              { label: 'Hours', value: countdown.hours },
+              { label: 'Minutes', value: countdown.minutes },
+              { label: 'Seconds', value: countdown.seconds },
+            ].map((unit) => (
+              <div key={unit.label} className="min-w-[70px]">
+                <div className="text-3xl font-bold">{String(unit.value).padStart(2, '0')}</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-white/70">{unit.label}</div>
+              </div>
+            ))}
+          </div>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto text-left">
             {detailBlocks.map((block) => (
               <div
@@ -259,6 +295,20 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
             {currentMedia.description || subtitle || `${DEFAULT_POSTER_DETAILS.dateLine} · ${DEFAULT_POSTER_DETAILS.timeLine}`}
           </p>
 
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-white/90">
+            {[
+              { label: 'Days', value: countdown.days },
+              { label: 'Hours', value: countdown.hours },
+              { label: 'Minutes', value: countdown.minutes },
+              { label: 'Seconds', value: countdown.seconds },
+            ].map((unit) => (
+              <div key={unit.label} className="min-w-[70px] text-center">
+                <div className="text-3xl md:text-4xl font-bold">{String(unit.value).padStart(2, '0')}</div>
+                <div className="text-xs uppercase tracking-[0.4em] text-white/70">{unit.label}</div>
+              </div>
+            ))}
+          </div>
+
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
             {detailBlocks.map((block) => (
               <div
@@ -268,11 +318,26 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
                 <p className="text-xs uppercase tracking-[0.3em] text-white/70 mb-2">
                   {block.label}
                 </p>
-                {block.lines.map((line) => (
-                  <p key={line} className="text-base md:text-lg leading-relaxed">
-                    {line}
-                  </p>
-                ))}
+                {block.lines ? (
+                  block.lines.map((line) => (
+                    typeof line === 'string' ? (
+                      <p key={line} className="text-base md:text-lg leading-relaxed">
+                        {line}
+                      </p>
+                    ) : (
+                      <p key={line.text} className="text-base md:text-lg leading-relaxed">
+                        <a
+                          href={line.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-white"
+                        >
+                          {line.text}
+                        </a>
+                      </p>
+                    )
+                  ))
+                ) : null}
               </div>
             ))}
           </div>
