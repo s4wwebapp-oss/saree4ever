@@ -76,6 +76,13 @@ export default function ComingSoon({ title = 'Opening Soon', subtitle = 'Visit o
   }, []);
 
   useEffect(() => {
+    document.body.classList.add('coming-soon-mode');
+    return () => {
+      document.body.classList.remove('coming-soon-mode');
+    };
+  }, []);
+
+  useEffect(() => {
     // Initialize video refs array
     videoRefs.current = videoRefs.current.slice(0, activeMedia.length);
   }, [activeMedia.length]);

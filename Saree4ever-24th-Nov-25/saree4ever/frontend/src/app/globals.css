@@ -219,3 +219,7 @@
   }
 }
 
+
+body.coming-soon-mode .coming-soon-hide-search {
+  display: none !important;
+}

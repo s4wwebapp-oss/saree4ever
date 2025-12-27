@@ -280,7 +280,7 @@ export default function Header() {
 
             {/* Search Bar - Center (flexible) */}
             <div className="flex-1 max-w-2xl mx-4">
-              <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-sm">
+              <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-sm coming-soon-hide-search">
                 {/* All Categories Dropdown */}
                 <div className="relative">
                   <button
@@ -441,7 +441,7 @@ export default function Header() {
 
           {/* Mobile Search Bar - Below logo row */}
           <div className="md:hidden pb-3">
-            <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-sm">
+            <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-sm coming-soon-hide-search">
               <div className="relative">
                 <button
                   type="button"
