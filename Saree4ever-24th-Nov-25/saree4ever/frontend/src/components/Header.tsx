@@ -497,7 +497,7 @@ export default function Header() {
       {/* Menu Bar - Navigation Links - Hidden on mobile */}
       <div className="bg-white border-b border-gray-200 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-center gap-4 md:gap-6 lg:gap-8 py-3 overflow-x-auto">
+          <nav className="flex items-center justify-center gap-4 md:gap-6 lg:gap-8 py-3 overflow-x-auto coming-soon-hide-nav">
             <Link
               href="/"
               className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${

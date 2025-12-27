@@ -223,3 +223,7 @@
 body.coming-soon-mode .coming-soon-hide-search {
   display: none !important;
 }
+
+body.coming-soon-mode .coming-soon-hide-nav {
+  display: none !important;
+}
