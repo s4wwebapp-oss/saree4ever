@@ -21,6 +21,20 @@ interface ComingSoonProps {
   media: ComingSoonMedia[];
 }
 
+const DEFAULT_POSTER_DETAILS = {
+  headline: 'Grand Opening',
+  brandName: 'SAREE4EVER',
+  dateLine: '4th Jan 2026',
+  timeLine: '10 AM onwards',
+  venue: [
+    'Opp. to Asha Kirana Blind School, Kemmanahalli',
+    'Chikkamagaluru - 577101, Karnataka',
+  ],
+  instagram: '@saree4ever',
+  website: 'www.Saree4ever.com',
+  contact: '+91 8088 393915',
+};
+
 export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are working on something amazing!', media = [] }: ComingSoonProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -31,6 +45,12 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
 
   // Filter active media
   const activeMedia = media.filter(m => m);
+  const detailBlocks = [
+    { label: 'Date & Time', lines: [DEFAULT_POSTER_DETAILS.dateLine, DEFAULT_POSTER_DETAILS.timeLine] },
+    { label: 'Venue', lines: DEFAULT_POSTER_DETAILS.venue },
+    { label: 'Follow', lines: [`Instagram ${DEFAULT_POSTER_DETAILS.instagram}`, `Explore ${DEFAULT_POSTER_DETAILS.website}`] },
+    { label: 'Contact', lines: [DEFAULT_POSTER_DETAILS.contact] },
+  ];
 
   useEffect(() => {
     // Initialize video refs array
@@ -162,9 +182,26 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
   if (activeMedia.length === 0) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center text-white">
-        <div className="text-center">
+        <div className="text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{title}</h1>
           <p className="text-xl md:text-2xl">{subtitle}</p>
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto text-left">
+            {detailBlocks.map((block) => (
+              <div
+                key={block.label}
+                className="bg-white/10 border border-white/20 p-4 rounded-lg"
+              >
+                <p className="text-xs uppercase tracking-[0.3em] text-white/70 mb-2">
+                  {block.label}
+                </p>
+                {block.lines.map((line) => (
+                  <p key={line} className="text-base leading-relaxed">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -209,29 +246,36 @@ export default function ComingSoon({ title = 'Coming Soon', subtitle = 'We are w
         )}
       </div>
 
-      {/* Overlay with title and subtitle */}
-      <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
-        <div className="text-center text-white px-4">
-          {currentMedia.title && (
-            <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
-              {currentMedia.title}
-            </h1>
-          )}
-          {currentMedia.description && (
-            <p className="text-xl md:text-2xl lg:text-3xl drop-shadow-lg max-w-3xl mx-auto">
-              {currentMedia.description}
-            </p>
-          )}
-          {!currentMedia.title && !currentMedia.description && (
-            <>
-              <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
-                {title}
-              </h1>
-              <p className="text-xl md:text-2xl lg:text-3xl drop-shadow-lg">
-                {subtitle}
-              </p>
-            </>
-          )}
+      {/* Overlay with title, subtitle and event details */}
+      <div className="absolute inset-0 bg-black/35 flex items-center justify-center z-10 px-4 py-10">
+        <div className="text-center text-white px-4 max-w-5xl">
+          <p className="text-sm uppercase tracking-[0.5em] text-white/70 mb-3">
+            {DEFAULT_POSTER_DETAILS.headline}
+          </p>
+          <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
+            {currentMedia.title || title || DEFAULT_POSTER_DETAILS.brandName}
+          </h1>
+          <p className="text-xl md:text-2xl lg:text-3xl drop-shadow-lg max-w-3xl mx-auto">
+            {currentMedia.description || subtitle || `${DEFAULT_POSTER_DETAILS.dateLine} · ${DEFAULT_POSTER_DETAILS.timeLine}`}
+          </p>
+
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+            {detailBlocks.map((block) => (
+              <div
+                key={block.label}
+                className="bg-white/10 backdrop-blur-sm border border-white/20 p-4 rounded-lg shadow-lg"
+              >
+                <p className="text-xs uppercase tracking-[0.3em] text-white/70 mb-2">
+                  {block.label}
+                </p>
+                {block.lines.map((line) => (
+                  <p key={line} className="text-base md:text-lg leading-relaxed">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
