@@ -49,7 +49,7 @@ const getTimeLeft = () => {
   };
 };
 
-export default function ComingSoon({ title = 'Opening Soon', subtitle = 'Visit our store and experience the Saree4ever collection.', media = [] }: ComingSoonProps) {
+export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon Online Shopping will be on live', media = [] }: ComingSoonProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
