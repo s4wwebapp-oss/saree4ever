@@ -14,12 +14,12 @@ exports.getSettings = async () => {
     // If table doesn't exist yet, return default
     if (error.message?.includes('schema cache') || error.message?.includes('Could not find the table')) {
       console.warn('Coming soon settings table not found. Please run the migration.');
-      return { is_enabled: false, title: 'Coming Soon', subtitle: 'We are working on something amazing!' };
+      return { is_enabled: false, title: 'Grand Opening', subtitle: 'We are working on something amazing!' };
     }
     throw error;
   }
 
-  return data || { is_enabled: false, title: 'Coming Soon', subtitle: 'We are working on something amazing!' };
+  return data || { is_enabled: false, title: 'Grand Opening', subtitle: 'We are working on something amazing!' };
 };
 
 /**

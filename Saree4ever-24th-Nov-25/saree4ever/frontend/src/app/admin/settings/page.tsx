@@ -23,7 +23,7 @@ export default function AdminSettingsPage() {
   const [loadingSocialMedia, setLoadingSocialMedia] = useState(true);
   const [comingSoonSettings, setComingSoonSettings] = useState<ComingSoonSettings>({
     is_enabled: false,
-    title: 'Coming Soon',
+    title: 'Grand Opening',
     subtitle: 'We are working on something amazing!',
   });
   const [loadingComingSoon, setLoadingComingSoon] = useState(true);
@@ -468,7 +468,7 @@ export default function AdminSettingsPage() {
                             handleComingSoonUpdate({ title: e.target.value });
                           }
                         }}
-                        placeholder="Coming Soon"
+                        placeholder="Grand Opening"
                         className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-black text-sm"
                         disabled={saving}
                       />

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
-interface ComingSoonMedia {
+export interface ComingSoonMedia {
   id: string;
   media_type: 'video' | 'image';
   media_url: string;
@@ -15,14 +15,19 @@ interface ComingSoonMedia {
   loop?: boolean;
 }
 
-interface ComingSoonProps {
+export interface ComingSoonProps {
   title?: string;
   subtitle?: string;
   media: ComingSoonMedia[];
 }
 
+interface DetailBlockEntry {
+  text: string;
+  href?: string; // Make href optional
+}
+
 const DEFAULT_POSTER_DETAILS = {
-  headline: 'Grand Opening',
+  headline: 'Welcome', // Edit this text to change the headline above the main title
   brandName: 'SAREE4EVER',
   dateLine: '4th Jan 2026',
   timeLine: '10 AM onwards',
@@ -52,6 +57,7 @@ const getTimeLeft = () => {
 export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon Online Shopping will be on live', media = [] }: ComingSoonProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,7 +66,7 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
 
   // Filter active media
   const activeMedia = media.filter(m => m);
-  const detailBlocks = [
+  const detailBlocks: { label: string; entries: DetailBlockEntry[] }[] = [ // Use the new interface here
     {
       label: 'Date & Time',
       entries: [
@@ -109,7 +115,6 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
     if (activeMedia.length > 0 && activeMedia[currentIndex]?.media_type === 'video') {
       const video = videoRefs.current[currentIndex];
       if (video) {
-        video.currentTime = 0;
         video.play().catch(err => {
           console.log('Autoplay prevented:', err);
         });
@@ -123,6 +128,20 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
       }
     });
   }, [currentIndex, activeMedia]);
+
+  // Sync muted state with all video elements
+  useEffect(() => {
+    videoRefs.current.forEach((video) => {
+      if (video) {
+        video.muted = isMuted;
+      }
+    });
+  }, [isMuted]);
+
+  // Toggle mute/unmute
+  const toggleMute = () => {
+    setIsMuted(prev => !prev);
+  };
 
   // Handle scroll to change media
   useEffect(() => {
@@ -288,16 +307,39 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
       className="fixed inset-0 bg-black overflow-hidden"
       style={{ touchAction: 'none' }}
     >
+      {/* Mute/Unmute Button - Top Right */}
+      {activeMedia.some(m => m.media_type === 'video') && (
+        <button
+          onClick={toggleMute}
+          className="absolute top-4 right-4 z-30 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-all backdrop-blur-sm border border-white/20"
+          aria-label={isMuted ? 'Unmute' : 'Mute'}
+        >
+          {isMuted ? (
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+          )}
+        </button>
+      )}
+
       {/* Media Display */}
       <div className="absolute inset-0">
         {currentMedia.media_type === 'video' ? (
           <video
             ref={(el) => {
               videoRefs.current[currentIndex] = el;
+              if (el) {
+                el.muted = isMuted;
+              }
             }}
             src={currentMedia.media_url}
             autoPlay={currentMedia.autoplay !== false}
-            muted={currentMedia.muted !== false}
+            muted={isMuted}
             loop={currentMedia.loop !== false}
             playsInline
             className="w-full h-full object-cover"
@@ -311,7 +353,7 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
         ) : (
           <Image
             src={currentMedia.media_url}
-            alt={currentMedia.title || 'Coming Soon'}
+            alt={currentMedia.title || 'Grand Opening'}
             fill
             className="object-cover"
             priority

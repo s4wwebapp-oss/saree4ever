@@ -39,7 +39,7 @@ interface MenuConfig {
   column_3_title: string;
 }
 
-export default function Header() {
+export default function Header({}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -53,6 +53,7 @@ export default function Header() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [wishlistCount] = useState(0); // TODO: Implement wishlist functionality
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isComingSoonMode, setIsComingSoonMode] = useState(false);
   const { itemCount } = useCart();
   const pathname = usePathname();
   const shopDropdownRef = useRef<HTMLDivElement>(null);
@@ -126,6 +127,32 @@ export default function Header() {
     fetchData();
   }, []);
 
+  // Check if coming soon mode is active
+  useEffect(() => {
+    const checkComingSoonMode = () => {
+      setIsComingSoonMode(document.body.classList.contains('coming-soon-mode'));
+    };
+    
+    // Check initially
+    checkComingSoonMode();
+    
+    // Watch for changes (when ComingSoon component mounts/unmounts)
+    const observer = new MutationObserver(checkComingSoonMode);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
+
+  // Close mobile menu when Grand Opening mode is active
+  useEffect(() => {
+    if (isComingSoonMode) {
+      setIsMenuOpen(false);
+    }
+  }, [isComingSoonMode]);
+
   // Handle scroll to collapse announcement and menu bars
   useEffect(() => {
     const handleScroll = () => {
@@ -197,8 +224,8 @@ export default function Header() {
 
   return (
     <header className="bg-white sticky top-0 z-50">
-      {/* Top Announcement Bar - Black (Collapses on scroll) */}
-      {announcement && announcement.is_active && (
+      {/* Top Announcement Bar - Black (Collapses on scroll) - Hidden in Grand Opening mode */}
+      {announcement && announcement.is_active && !isComingSoonMode && (
         <div className={`bg-black text-white text-xs md:text-sm py-2 md:py-2.5 relative transition-all duration-300 ${
           isScrolled ? 'hidden' : 'block'
         }`}>
@@ -345,7 +372,8 @@ export default function Header() {
             </div>
 
             {/* User Icons - Right side */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            {!isComingSoonMode && (
+              <div className="flex items-center gap-4 flex-shrink-0">
               <Link href="/wishlist" className="relative flex items-center hover:opacity-70 transition-opacity">
                 <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -375,40 +403,44 @@ export default function Header() {
                 )}
               </Link>
             </div>
+            )}
           </div>
 
           {/* Mobile Header: Hamburger | Logo | User Icons */}
           <div className="md:hidden flex items-center justify-between py-3">
-            {/* Mobile menu button - Left side */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 flex-shrink-0"
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
+            {/* Mobile menu button - Left side - Hidden in Grand Opening mode */}
+            {!isComingSoonMode && (
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2 flex-shrink-0"
+                aria-label="Toggle menu"
+              >
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  {isMenuOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
+            )}
 
             {/* Brand Logo - Center - Smaller for mobile */}
-            <div className="flex-1 flex justify-center items-center px-2">
+            <div className={`flex-1 flex justify-center items-center px-2 ${isComingSoonMode ? 'justify-center' : ''}`}>
               <Logo size={{ width: 120, height: 45 }} backgroundColor="white" />
             </div>
 
             {/* User Icons - Right side */}
-            <div className="flex items-center gap-3">
+            {!isComingSoonMode && (
+              <div className="flex items-center gap-3">
               <Link href="/wishlist" className="relative flex items-center hover:opacity-70 transition-opacity">
                 <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -437,6 +469,7 @@ export default function Header() {
                 )}
               </Link>
             </div>
+            )}
           </div>
 
           {/* Mobile Search Bar - Below logo row */}
@@ -485,7 +518,7 @@ export default function Header() {
                 className="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 transition-colors"
                 aria-label="Search"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
@@ -647,9 +680,8 @@ export default function Header() {
             </Link>
             <Link
               href="/stories"
-              className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${
-                isActive('/stories') ? 'font-semibold underline' : ''
-              }`}
+              className="text-sm font-medium text-black"
+              onClick={() => setIsMenuOpen(false)}
             >
               Stories
             </Link>
@@ -657,8 +689,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isMenuOpen && (
+      {/* Mobile menu - Hidden in Grand Opening mode */}
+      {isMenuOpen && !isComingSoonMode && (
         <div className="md:hidden border-t border-gray-200 py-4">
           <nav className="flex flex-col space-y-4 px-4">
             <Link
@@ -707,6 +739,15 @@ export default function Header() {
                       {type.name}
                     </Link>
                   ))}
+                  {types.length > 10 && (
+                    <Link
+                      href="/products"
+                      className="block px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 border-t border-gray-200"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      View All Types
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
@@ -735,6 +776,15 @@ export default function Header() {
                       {collection.name}
                     </Link>
                   ))}
+                  {collections.length > 10 && (
+                    <Link
+                      href="/collections"
+                      className="block px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 border-t border-gray-200"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      View All Collections
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
@@ -763,6 +813,15 @@ export default function Header() {
                       {category.name}
                     </Link>
                   ))}
+                  {categories.length > 10 && (
+                    <Link
+                      href="/categories"
+                      className="block px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 border-t border-gray-200"
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      View All Categories
+                    </Link>
+                  )}
                 </div>
               )}
             </div>

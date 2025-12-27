@@ -64,7 +64,8 @@ async function fetchAPI<T>(
     ...options,
     headers,
     signal: options.signal || controller?.signal,
-    cache: 'no-store', // Disable cache to ensure fresh data
+    cache: 'force-cache', // Enable cache for static generation
+    next: { revalidate: 3600 }, // Revalidate every hour
   };
 
   if (controller) {

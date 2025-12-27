@@ -227,3 +227,9 @@ body.coming-soon-mode .coming-soon-hide-search {
 body.coming-soon-mode .coming-soon-hide-nav {
   display: none !important;
 }
+
+/* Remove left and top positioning from nextjs-portal elements */
+nextjs-portal {
+  left: unset !important;
+  top: unset !important;
+}

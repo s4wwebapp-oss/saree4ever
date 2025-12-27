@@ -4,15 +4,15 @@
 CREATE TABLE IF NOT EXISTS coming_soon_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   is_enabled BOOLEAN DEFAULT false,
-  title TEXT DEFAULT 'Coming Soon',
-  subtitle TEXT DEFAULT 'We are working on something amazing!',
+  title TEXT DEFAULT 'Grand Opening',
+  subtitle TEXT DEFAULT 'Get ready to immerse yourself in the art of the saree.',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Insert default setting (disabled by default)
 INSERT INTO coming_soon_settings (is_enabled, title, subtitle)
-VALUES (false, 'Coming Soon', 'We are working on something amazing!')
+VALUES (false, 'Grand Opening', 'Get ready to immerse yourself in the art of the saree.')
 ON CONFLICT DO NOTHING;
 
 -- Create coming_soon_media table for managing videos and images

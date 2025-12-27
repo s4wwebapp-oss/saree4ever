@@ -7,7 +7,7 @@ import ExpandableCategoryGrid from '@/components/ExpandableCategoryGrid';
 import ReelsSection from '@/components/ReelsSection';
 import LandingPageVideoSection from '@/components/LandingPageVideoSection';
 import ReviewsSection from '@/components/ReviewsSection';
-import ComingSoon from '@/components/ComingSoon';
+import ComingSoon, { ComingSoonMedia, ComingSoonProps } from '@/components/ComingSoon';
 
 interface Product {
   id: string;
@@ -338,10 +338,10 @@ async function getComingSoonSettings(): Promise<{ is_enabled: boolean; title?: s
   }
 }
 
-async function getComingSoonMedia(): Promise<any[]> {
+async function getComingSoonMedia(): Promise<ComingSoonMedia[]> {
   try {
     const response: any = await api.comingSoon.getMedia();
-    return response.media || [];
+    return (response.media || []) as ComingSoonMedia[];
   } catch (error) {
     console.error('Error fetching coming soon media:', error);
     return [];
