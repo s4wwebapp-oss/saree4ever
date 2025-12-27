@@ -61,10 +61,27 @@ export default function ComingSoon({ title = 'Opening Soon', subtitle = 'Visit o
   // Filter active media
   const activeMedia = media.filter(m => m);
   const detailBlocks = [
-    { label: 'Date & Time', lines: [DEFAULT_POSTER_DETAILS.dateLine, DEFAULT_POSTER_DETAILS.timeLine] },
-    { label: 'Venue', lines: DEFAULT_POSTER_DETAILS.venue },
-    { label: 'Follow', lines: [{ text: `Instagram ${DEFAULT_POSTER_DETAILS.instagram}`, href: 'https://instagram.com/saree4ever' }] },
-    { label: 'Contact', lines: [DEFAULT_POSTER_DETAILS.contact] },
+    {
+      label: 'Date & Time',
+      entries: [
+        { text: DEFAULT_POSTER_DETAILS.dateLine },
+        { text: DEFAULT_POSTER_DETAILS.timeLine },
+      ],
+    },
+    {
+      label: 'Venue',
+      entries: DEFAULT_POSTER_DETAILS.venue.map((line) => ({ text: line })),
+    },
+    {
+      label: 'Follow',
+      entries: [
+        {
+          text: `Instagram ${DEFAULT_POSTER_DETAILS.instagram}`,
+          href: 'https://instagram.com/saree4ever',
+        },
+      ],
+    },
+    { label: 'Contact', entries: [{ text: DEFAULT_POSTER_DETAILS.contact }] },
   ];
 
   useEffect(() => {
@@ -237,10 +254,23 @@ export default function ComingSoon({ title = 'Opening Soon', subtitle = 'Visit o
                 <p className="text-xs uppercase tracking-[0.3em] text-white/70 mb-2">
                   {block.label}
                 </p>
-                {block.lines.map((line) => (
-                  <p key={line} className="text-base leading-relaxed">
-                    {line}
-                  </p>
+                {block.entries.map((entry) => (
+                  entry.href ? (
+                    <p key={entry.text} className="text-base leading-relaxed">
+                      <a
+                        href={entry.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-white"
+                      >
+                        {entry.text}
+                      </a>
+                    </p>
+                  ) : (
+                    <p key={entry.text} className="text-base leading-relaxed">
+                      {entry.text}
+                    </p>
+                  )
                 ))}
               </div>
             ))}
@@ -325,26 +355,24 @@ export default function ComingSoon({ title = 'Opening Soon', subtitle = 'Visit o
                 <p className="text-xs uppercase tracking-[0.3em] text-white/70 mb-2">
                   {block.label}
                 </p>
-                {block.lines ? (
-                  block.lines.map((line) => (
-                    typeof line === 'string' ? (
-                      <p key={line} className="text-base md:text-lg leading-relaxed">
-                        {line}
-                      </p>
-                    ) : (
-                      <p key={line.text} className="text-base md:text-lg leading-relaxed">
-                        <a
-                          href={line.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline hover:text-white"
-                        >
-                          {line.text}
-                        </a>
-                      </p>
-                    )
-                  ))
-                ) : null}
+                {block.entries.map((entry) => (
+                  entry.href ? (
+                    <p key={entry.text} className="text-base md:text-lg leading-relaxed">
+                      <a
+                        href={entry.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-white"
+                      >
+                        {entry.text}
+                      </a>
+                    </p>
+                  ) : (
+                    <p key={entry.text} className="text-base md:text-lg leading-relaxed">
+                      {entry.text}
+                    </p>
+                  )
+                ))}
               </div>
             ))}
           </div>
