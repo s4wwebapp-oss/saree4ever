@@ -77,7 +77,8 @@ const getInitialCountdown = () => {
 };
 
 export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon Online Shopping will be on live', media = [] }: ComingSoonProps) {
-  const [isMuted, setIsMuted] = useState(false);
+  // Start with muted=true so videos can autoplay (browsers require muted videos for autoplay)
+  const [isMuted, setIsMuted] = useState(true);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   // Initialize with fixed server-side value to avoid hydration mismatch
   const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(getInitialCountdown());
@@ -141,20 +142,31 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
     videoRefs.current = videoRefs.current.slice(0, activeMedia.length);
   }, [activeMedia.length]);
 
-  // Sync muted state and auto-play videos
+  // Auto-play videos on mount and when media changes
   useEffect(() => {
     videoRefs.current.forEach((video) => {
       if (video) {
+        // Set muted state (required for autoplay)
         video.muted = isMuted;
-        // Try to play if paused
-        if (video.paused) {
-          video.play().catch(err => {
+        // Try to play immediately
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
             console.log('Autoplay prevented:', err);
           });
         }
       }
     });
   }, [isMuted, activeMedia.length]);
+
+  // Sync muted state when it changes
+  useEffect(() => {
+    videoRefs.current.forEach((video) => {
+      if (video) {
+        video.muted = isMuted;
+      }
+    });
+  }, [isMuted]);
 
   // Toggle mute/unmute
   const toggleMute = () => {
@@ -257,7 +269,22 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
                 ref={(el) => {
                   videoRefs.current[index] = el;
                   if (el) {
+                    // Set muted state for autoplay to work
                     el.muted = isMuted;
+                    // Try to play immediately when video element is ready
+                    el.addEventListener('loadeddata', () => {
+                      el.muted = isMuted;
+                      el.play().catch(err => {
+                        console.log('Autoplay prevented on load:', err);
+                      });
+                    });
+                    // Also try to play if already loaded
+                    if (el.readyState >= 2) {
+                      el.muted = isMuted;
+                      el.play().catch(err => {
+                        console.log('Autoplay prevented:', err);
+                      });
+                    }
                   }
                 }}
                 src={mediaItem.media_url}

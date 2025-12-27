@@ -297,8 +297,8 @@ export default function Header({}) {
       <div className="bg-white border-b border-gray-200 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Desktop Header: Search (Left) | Logo (Center) | User Icons (Right) - All in one row */}
-          <div className={`hidden md:grid grid-cols-3 items-center gap-4 py-4 transition-all duration-300 ${
-            isScrolled ? 'py-2' : ''
+          <div className={`hidden md:grid grid-cols-3 items-center gap-4 py-0 transition-all duration-300 ${
+            isScrolled ? 'py-0' : ''
           }`}>
             {/* Search Bar - Left side */}
             <div className="flex justify-start">
@@ -370,7 +370,7 @@ export default function Header({}) {
 
             {/* Logo - Center */}
             <div className="flex items-center justify-center">
-              <Logo size={{ width: 160, height: 60 }} backgroundColor="white" />
+              <Logo size={{ width: 240, height: 90 }} backgroundColor="white" />
             </div>
 
             {/* User Icons - Right side */}
@@ -411,7 +411,7 @@ export default function Header({}) {
           </div>
 
           {/* Mobile Header: Hamburger | Logo | User Icons */}
-          <div className="md:hidden flex items-center justify-between py-3">
+          <div className="md:hidden flex items-center justify-between py-0">
             {/* Mobile menu button - Left side - Hidden in Grand Opening mode */}
             {!isComingSoonMode && (
               <button
@@ -439,7 +439,7 @@ export default function Header({}) {
 
             {/* Brand Logo - Center - Smaller for mobile */}
             <div className={`flex-1 flex justify-center items-center px-2 ${isComingSoonMode ? 'justify-center' : ''}`}>
-              <Logo size={{ width: 120, height: 45 }} backgroundColor="white" />
+              <Logo size={{ width: 180, height: 68 }} backgroundColor="white" />
             </div>
 
             {/* User Icons - Right side */}
@@ -477,7 +477,7 @@ export default function Header({}) {
           </div>
 
           {/* Mobile Search Bar - Below logo row */}
-          <div className="md:hidden pb-3">
+          <div className="md:hidden pb-0">
             <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-sm coming-soon-hide-search">
               <div className="relative">
                 <button

@@ -19,6 +19,15 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "saree4ever - Traditional Sarees for Modern Occasions",
   description: "Discover our curated collection of traditional sarees including Kanjivaram, Banarasi, and more.",
+  icons: {
+    icon: [
+      { url: '/icon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({

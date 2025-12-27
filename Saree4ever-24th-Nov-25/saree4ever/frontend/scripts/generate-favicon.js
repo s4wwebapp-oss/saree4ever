@@ -26,6 +26,7 @@ const LOGO_PATH = path.join(__dirname, '../public/saree4ever-logo.png');
 const OUTPUT_DIR = path.join(__dirname, '../src/app');
 const SIZES = [
   { size: 32, name: 'icon.png' },
+  { size: 32, name: 'favicon.ico' }, // Also generate ICO format for better compatibility
   { size: 192, name: 'apple-icon.png' },
   { size: 512, name: 'icon-512.png' },
 ];
@@ -80,22 +81,31 @@ async function generateFavicon() {
       const x = Math.floor((size - logoWidth) / 2);
       const y = Math.floor((size - logoHeight) / 2);
 
+      // Determine output format based on file extension
+      const isIco = name.endsWith('.ico');
+      
       // Composite the resized logo onto the square canvas
-      await squareCanvas
-        .composite([
-          {
-            input: await sharp(LOGO_PATH)
-              .resize(logoWidth, logoHeight, {
-                fit: 'contain',
-                background: { r: 0, g: 0, b: 0, alpha: 0 }
-              })
-              .toBuffer(),
-            left: x,
-            top: y
-          }
-        ])
-        .png()
-        .toFile(outputPath);
+      const compositeCanvas = squareCanvas.composite([
+        {
+          input: await sharp(LOGO_PATH)
+            .resize(logoWidth, logoHeight, {
+              fit: 'contain',
+              background: { r: 0, g: 0, b: 0, alpha: 0 }
+            })
+            .toBuffer(),
+          left: x,
+          top: y
+        }
+      ]);
+
+      // Save in appropriate format
+      if (isIco) {
+        // For ICO, we'll save as PNG first then convert (sharp doesn't support ICO directly)
+        // Most modern browsers accept PNG as favicon.ico, so we'll save as PNG with .ico extension
+        await compositeCanvas.png().toFile(outputPath);
+      } else {
+        await compositeCanvas.png().toFile(outputPath);
+      }
 
       console.log(`✓ Generated ${name} (${size}x${size}px) at ${outputPath}`);
     }
