@@ -124,4 +124,3 @@ exports.deleteType = async (id) => {
   if (error) throw error;
   return { message: 'Type deleted successfully' };
 };
-

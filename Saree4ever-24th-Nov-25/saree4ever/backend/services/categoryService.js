@@ -128,4 +128,3 @@ exports.deleteCategory = async (id) => {
   if (error) throw error;
   return { message: 'Category deleted successfully' };
 };
-

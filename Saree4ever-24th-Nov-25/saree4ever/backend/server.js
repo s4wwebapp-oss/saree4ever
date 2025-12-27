@@ -26,6 +26,7 @@ const landingPageVideoRoutes = require('./routes/landing-page-video');
 const landingPageSectionRoutes = require('./routes/landing-page-sections');
 const menuConfigRoutes = require('./routes/menu-config');
 const socialMediaSettingsRoutes = require('./routes/social-media-settings');
+const comingSoonRoutes = require('./routes/coming-soon');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -123,6 +124,7 @@ app.use('/api/landing-page-video', landingPageVideoRoutes);
 app.use('/api/landing-page-sections', landingPageSectionRoutes);
 app.use('/api/menu-config', menuConfigRoutes);
 app.use('/api/social-media-settings', socialMediaSettingsRoutes);
+app.use('/api/coming-soon', comingSoonRoutes);
 app.use('/api/upload', uploadRoutes);
 
 // 404 handler

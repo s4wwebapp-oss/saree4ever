@@ -56,3 +56,4 @@ COMMENT ON COLUMN social_media_settings.is_visible IS 'Whether the social media 
 
 
 
+

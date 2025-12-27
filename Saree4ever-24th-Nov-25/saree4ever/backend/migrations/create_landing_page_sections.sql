@@ -63,3 +63,4 @@ COMMENT ON COLUMN landing_page_sections.is_visible IS 'Whether the section shoul
 
 
 
+

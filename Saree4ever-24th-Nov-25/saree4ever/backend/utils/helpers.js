@@ -209,4 +209,3 @@ exports.generateVariantSKU = async (supabase, productId, productSKU, existingSKU
   
   return `${baseSKU}-V${nextVariant}`;
 };
-

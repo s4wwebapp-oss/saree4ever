@@ -161,3 +161,4 @@ COMMENT ON FUNCTION auto_generate_variant_sku IS 'Trigger function to auto-gener
 
 
 
+

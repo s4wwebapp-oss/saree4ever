@@ -16,3 +16,4 @@ COMMENT ON COLUMN landing_page_video.video_orientation IS 'Video orientation: ho
 
 
 
+
