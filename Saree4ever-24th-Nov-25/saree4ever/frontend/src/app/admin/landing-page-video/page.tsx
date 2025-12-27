@@ -18,6 +18,38 @@ interface LandingPageVideo {
   updated_at: string;
 }
 
+// Helper function to get video URL (same logic as LandingPageVideoSection)
+const getVideoUrl = (video: LandingPageVideo): string | null => {
+  // Prefer video_url if it exists (should be a full URL from backend)
+  if (video.video_url) {
+    // Ensure URL is absolute (starts with http:// or https://)
+    if (video.video_url.startsWith('http://') || video.video_url.startsWith('https://')) {
+      return video.video_url;
+    }
+    // If relative URL, make it absolute using current origin or API URL
+    const baseUrl = typeof window !== 'undefined' 
+      ? window.location.origin 
+      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001').replace('/api', '');
+    return `${baseUrl}${video.video_url.startsWith('/') ? video.video_url : `/${video.video_url}`}`;
+  }
+  
+  // Fallback: construct URL from video_file_path if available
+  if (video.video_file_path) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (supabaseUrl) {
+      // Ensure Supabase URL doesn't have trailing slash
+      const cleanSupabaseUrl = supabaseUrl.replace(/\/$/, '');
+      return `${cleanSupabaseUrl}/storage/v1/object/public/landing-videos/${video.video_file_path}`;
+    }
+    // If Supabase URL not available, try to construct from API URL
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+    const baseUrl = apiUrl.replace('/api', '');
+    return `${baseUrl}/api/uploads/landing-videos/${video.video_file_path}`;
+  }
+  
+  return null;
+};
+
 export default function AdminLandingPageVideoPage() {
   const [videos, setVideos] = useState<LandingPageVideo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -683,7 +715,7 @@ export default function AdminLandingPageVideoPage() {
         ) : (
           <div className="space-y-4">
             {activeVideos.map((video, index) => {
-              const videoUrl = video.video_url || (video.video_file_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/landing-videos/${video.video_file_path}` : null);
+              const videoUrl = getVideoUrl(video);
               
               return (
                 <div key={video.id} className="border border-gray-200 p-4">
@@ -761,7 +793,7 @@ export default function AdminLandingPageVideoPage() {
           </h2>
           <div className="space-y-4">
             {videos.filter(v => !v.is_active).map((video) => {
-              const videoUrl = video.video_url || (video.video_file_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/landing-videos/${video.video_file_path}` : null);
+              const videoUrl = getVideoUrl(video);
               
               return (
                 <div key={video.id} className="border border-gray-200 p-4 opacity-60">
