@@ -296,18 +296,14 @@ export default function Header({}) {
       {/* Main Header Section - Fixed on scroll */}
       <div className="bg-white border-b border-gray-200 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Desktop Header: Logo (Left) | Search (Center) | User Icons (Right) - All in one row */}
-          <div className={`hidden md:flex items-center justify-between gap-4 py-4 transition-all duration-300 ${
+          {/* Desktop Header: Search (Left) | Logo (Center) | User Icons (Right) - All in one row */}
+          <div className={`hidden md:grid grid-cols-3 items-center gap-4 py-4 transition-all duration-300 ${
             isScrolled ? 'py-2' : ''
           }`}>
-            {/* Logo - Left side - Using exact logo image */}
-            <div className="flex-shrink-0 bg-white">
-              <Logo size={{ width: 160, height: 60 }} backgroundColor="white" />
-          </div>
-
-            {/* Search Bar - Center (flexible) */}
-            <div className="flex-1 max-w-2xl mx-4">
-              <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-sm coming-soon-hide-search">
+            {/* Search Bar - Left side */}
+            <div className="flex justify-start">
+              {!isComingSoonMode && (
+                <form onSubmit={handleSearch} className="flex items-center border border-gray-300 rounded-sm w-full max-w-2xl">
                 {/* All Categories Dropdown */}
                 <div className="relative">
                   <button
@@ -369,40 +365,48 @@ export default function Header({}) {
                   </svg>
                 </button>
               </form>
+              )}
+            </div>
+
+            {/* Logo - Center */}
+            <div className="flex items-center justify-center">
+              <Logo size={{ width: 160, height: 60 }} backgroundColor="white" />
             </div>
 
             {/* User Icons - Right side */}
-            {!isComingSoonMode && (
-              <div className="flex items-center gap-4 flex-shrink-0">
-              <Link href="/wishlist" className="relative flex items-center hover:opacity-70 transition-opacity">
-                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
+            {!isComingSoonMode ? (
+              <div className="flex items-center gap-4 justify-end">
+                <Link href="/wishlist" className="relative flex items-center hover:opacity-70 transition-opacity">
+                  <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
 
-              <Link href="/account" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span className="text-sm font-medium text-gray-700">Sign in/ Register</span>
-              </Link>
+                <Link href="/account" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+                  <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">Sign in/ Register</span>
+                </Link>
 
-              <Link href="/cart" className="relative flex items-center hover:opacity-70 transition-opacity">
+                <Link href="/cart" className="relative flex items-center hover:opacity-70 transition-opacity">
                   <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
-                {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {itemCount}
-                  </span>
-                )}
-              </Link>
-            </div>
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            ) : (
+              <div></div>
             )}
           </div>
 

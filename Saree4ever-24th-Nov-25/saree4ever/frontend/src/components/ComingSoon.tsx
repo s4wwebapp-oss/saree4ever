@@ -40,6 +40,7 @@ const DEFAULT_POSTER_DETAILS = {
   contact: '+91 8088 393915',
 };
 
+// Event date: January 4, 2026 at 10:00 AM IST (UTC+5:30) = 04:30 UTC
 const EVENT_DATE = new Date('2026-01-04T04:30:00.000Z');
 
 const getTimeLeft = () => {
@@ -55,12 +56,8 @@ const getTimeLeft = () => {
 };
 
 export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon Online Shopping will be on live', media = [] }: ComingSoonProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [countdown, setCountdown] = useState(getTimeLeft());
 
 
@@ -110,156 +107,41 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
     videoRefs.current = videoRefs.current.slice(0, activeMedia.length);
   }, [activeMedia.length]);
 
-  useEffect(() => {
-    // Auto-play current video
-    if (activeMedia.length > 0 && activeMedia[currentIndex]?.media_type === 'video') {
-      const video = videoRefs.current[currentIndex];
-      if (video) {
-        video.play().catch(err => {
-          console.log('Autoplay prevented:', err);
-        });
-      }
-    }
-
-    // Pause other videos
-    videoRefs.current.forEach((video, index) => {
-      if (video && index !== currentIndex) {
-        video.pause();
-      }
-    });
-  }, [currentIndex, activeMedia]);
-
-  // Sync muted state with all video elements
+  // Sync muted state and auto-play videos
   useEffect(() => {
     videoRefs.current.forEach((video) => {
       if (video) {
         video.muted = isMuted;
+        // Try to play if paused
+        if (video.paused) {
+          video.play().catch(err => {
+            console.log('Autoplay prevented:', err);
+          });
+        }
       }
     });
-  }, [isMuted]);
+  }, [isMuted, activeMedia.length]);
 
   // Toggle mute/unmute
   const toggleMute = () => {
     setIsMuted(prev => !prev);
   };
 
-  // Handle scroll to change media
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    let scrollStartY = 0;
-    let isScrolling = false;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (isScrolling) return;
-
-      const deltaY = e.deltaY;
-      const threshold = 50; // Minimum scroll distance
-
-      if (Math.abs(deltaY) > threshold) {
-        isScrolling = true;
-        setIsScrolling(true);
-
-        if (deltaY > 0 && currentIndex < activeMedia.length - 1) {
-          // Scroll down - next media
-          setCurrentIndex(prev => prev + 1);
-        } else if (deltaY < 0 && currentIndex > 0) {
-          // Scroll up - previous media
-          setCurrentIndex(prev => prev - 1);
-        }
-
-        // Reset scrolling flag after animation
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-        scrollTimeoutRef.current = setTimeout(() => {
-          isScrolling = false;
-          setIsScrolling(false);
-        }, 800);
-      }
-
-      e.preventDefault();
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      scrollStartY = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isScrolling) return;
-
-      const touchY = e.touches[0].clientY;
-      const deltaY = scrollStartY - touchY;
-      const threshold = 50;
-
-      if (Math.abs(deltaY) > threshold) {
-        isScrolling = true;
-        setIsScrolling(true);
-
-        if (deltaY > 0 && currentIndex < activeMedia.length - 1) {
-          // Swipe up - next media
-          setCurrentIndex(prev => prev + 1);
-        } else if (deltaY < 0 && currentIndex > 0) {
-          // Swipe down - previous media
-          setCurrentIndex(prev => prev - 1);
-        }
-
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-        scrollTimeoutRef.current = setTimeout(() => {
-          isScrolling = false;
-          setIsScrolling(false);
-        }, 800);
-      }
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [currentIndex, activeMedia.length]);
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isScrolling) return;
-
-      if (e.key === 'ArrowDown' && currentIndex < activeMedia.length - 1) {
-        setCurrentIndex(prev => prev + 1);
-      } else if (e.key === 'ArrowUp' && currentIndex > 0) {
-        setCurrentIndex(prev => prev - 1);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, activeMedia.length, isScrolling]);
-
   if (activeMedia.length === 0) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center text-white">
-        <div className="text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">{title}</h1>
-          <p className="text-xl md:text-2xl">{subtitle}</p>
-          <div className="mt-6 flex justify-center gap-4 text-white/90">
+      <div className="min-h-screen bg-black flex items-center justify-center text-white py-20 px-4">
+        <div className="text-center px-4 max-w-5xl w-full">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4">{title}</h1>
+          <p className="text-lg sm:text-xl md:text-2xl mb-8">{subtitle}</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3 sm:gap-4 text-white/90">
             {[
               { label: 'Days', value: countdown.days },
               { label: 'Hours', value: countdown.hours },
               { label: 'Minutes', value: countdown.minutes },
               { label: 'Seconds', value: countdown.seconds },
             ].map((unit) => (
-              <div key={unit.label} className="min-w-[70px]">
-                <div className="text-3xl font-bold">{String(unit.value).padStart(2, '0')}</div>
+              <div key={unit.label} className="min-w-[60px] sm:min-w-[70px]">
+                <div className="text-2xl sm:text-3xl font-bold">{String(unit.value).padStart(2, '0')}</div>
                 <div className="text-xs uppercase tracking-[0.3em] text-white/70">{unit.label}</div>
               </div>
             ))}
@@ -275,7 +157,7 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
                 </p>
                 {block.entries.map((entry) => (
                   entry.href ? (
-                    <p key={entry.text} className="text-base leading-relaxed">
+                    <p key={entry.text} className="text-sm sm:text-base leading-relaxed">
                       <a
                         href={entry.href}
                         target="_blank"
@@ -286,7 +168,7 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
                       </a>
                     </p>
                   ) : (
-                    <p key={entry.text} className="text-base leading-relaxed">
+                    <p key={entry.text} className="text-sm sm:text-base leading-relaxed">
                       {entry.text}
                     </p>
                   )
@@ -299,157 +181,132 @@ export default function ComingSoon({ title = 'GRAND OPENING', subtitle = 'Soon O
     );
   }
 
-  const currentMedia = activeMedia[currentIndex];
-
   return (
-    <div
-      ref={containerRef}
-      className="fixed inset-0 bg-black overflow-hidden"
-      style={{ touchAction: 'none' }}
-    >
-      {/* Mute/Unmute Button - Top Right */}
+    <div className="relative bg-black">
+      {/* Mute/Unmute Button - Fixed Top Right - Always visible when videos are present */}
       {activeMedia.some(m => m.media_type === 'video') && (
         <button
           onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-all backdrop-blur-sm border border-white/20"
+          className="fixed top-3 right-3 sm:top-4 sm:right-4 z-[100] p-1.5 sm:p-2 bg-black/30 hover:bg-black/50 rounded-full transition-all backdrop-blur-sm"
           aria-label={isMuted ? 'Unmute' : 'Mute'}
+          style={{ pointerEvents: 'auto' }}
         >
           {isMuted ? (
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
             </svg>
           ) : (
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
             </svg>
           )}
         </button>
       )}
 
-      {/* Media Display */}
-      <div className="absolute inset-0">
-        {currentMedia.media_type === 'video' ? (
-          <video
-            ref={(el) => {
-              videoRefs.current[currentIndex] = el;
-              if (el) {
-                el.muted = isMuted;
-              }
-            }}
-            src={currentMedia.media_url}
-            autoPlay={currentMedia.autoplay !== false}
-            muted={isMuted}
-            loop={currentMedia.loop !== false}
-            playsInline
-            className="w-full h-full object-cover"
-            onEnded={() => {
-              // Auto-advance to next media when video ends (if not looping)
-              if (!currentMedia.loop && currentIndex < activeMedia.length - 1) {
-                setTimeout(() => setCurrentIndex(prev => prev + 1), 500);
-              }
-            }}
-          />
-        ) : (
-          <Image
-            src={currentMedia.media_url}
-            alt={currentMedia.title || 'Grand Opening'}
-            fill
-            className="object-cover"
-            priority
-          />
-        )}
-      </div>
-
-      {/* Overlay with title, subtitle and event details */}
-      <div className="absolute inset-0 bg-black/35 flex items-center justify-center z-10 px-4 py-10">
-        <div className="text-center text-white px-4 max-w-5xl">
-          <p className="text-sm uppercase tracking-[0.5em] text-white/70 mb-3">
-            {DEFAULT_POSTER_DETAILS.headline}
-          </p>
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-4 drop-shadow-2xl">
-            {currentMedia.title || title || DEFAULT_POSTER_DETAILS.brandName}
-          </h1>
-          <p className="text-xl md:text-2xl lg:text-3xl drop-shadow-lg max-w-3xl mx-auto">
-            {currentMedia.description || subtitle || `${DEFAULT_POSTER_DETAILS.dateLine} · ${DEFAULT_POSTER_DETAILS.timeLine}`}
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-white/90">
-            {[
-              { label: 'Days', value: countdown.days },
-              { label: 'Hours', value: countdown.hours },
-              { label: 'Minutes', value: countdown.minutes },
-              { label: 'Seconds', value: countdown.seconds },
-            ].map((unit) => (
-              <div key={unit.label} className="min-w-[70px] text-center">
-                <div className="text-3xl md:text-4xl font-bold">{String(unit.value).padStart(2, '0')}</div>
-                <div className="text-xs uppercase tracking-[0.4em] text-white/70">{unit.label}</div>
-              </div>
-            ))}
+      {/* Scrollable Media Sections */}
+      {activeMedia.map((mediaItem, index) => (
+        <section
+          key={mediaItem.id || index}
+          className="relative min-h-screen w-full flex items-center justify-center overflow-hidden"
+        >
+          {/* Media Background */}
+          <div className="absolute inset-0 w-full h-full">
+            {mediaItem.media_type === 'video' ? (
+              <video
+                ref={(el) => {
+                  videoRefs.current[index] = el;
+                  if (el) {
+                    el.muted = isMuted;
+                  }
+                }}
+                src={mediaItem.media_url}
+                autoPlay={mediaItem.autoplay !== false}
+                muted={isMuted}
+                loop={mediaItem.loop !== false}
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={mediaItem.media_url}
+                alt={mediaItem.title || 'Grand Opening'}
+                fill
+                className="object-cover"
+                priority={index === 0}
+              />
+            )}
           </div>
 
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
-            {detailBlocks.map((block) => (
-              <div
-                key={block.label}
-                className="bg-white/10 backdrop-blur-sm border border-white/20 p-4 rounded-lg shadow-lg"
-              >
-                <p className="text-xs uppercase tracking-[0.3em] text-white/70 mb-2">
-                  {block.label}
+          {/* Overlay with content - Only show on first media item or if media has title/description */}
+          {(index === 0 || mediaItem.title || mediaItem.description) && (
+            <div className="relative z-10 w-full min-h-screen flex items-center justify-center bg-black/35 px-4 py-16 sm:py-20">
+              <div className="text-center text-white px-4 max-w-5xl w-full">
+                <p className="text-xs sm:text-sm uppercase tracking-[0.3em] sm:tracking-[0.5em] text-white/70 mb-3 sm:mb-4">
+                  {index === 0 ? DEFAULT_POSTER_DETAILS.headline : ''}
                 </p>
-                {block.entries.map((entry) => (
-                  entry.href ? (
-                    <p key={entry.text} className="text-base md:text-lg leading-relaxed">
-                      <a
-                        href={entry.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:text-white"
-                      >
-                        {entry.text}
-                      </a>
-                    </p>
-                  ) : (
-                    <p key={entry.text} className="text-base md:text-lg leading-relaxed">
-                      {entry.text}
-                    </p>
-                  )
-                ))}
+                <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 drop-shadow-2xl">
+                  {mediaItem.title || (index === 0 ? (title || DEFAULT_POSTER_DETAILS.brandName) : '')}
+                </h1>
+                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl drop-shadow-lg max-w-3xl mx-auto">
+                  {mediaItem.description || (index === 0 ? (subtitle || `${DEFAULT_POSTER_DETAILS.dateLine} · ${DEFAULT_POSTER_DETAILS.timeLine}`) : '')}
+                </p>
+
+                {/* Countdown Timer - Only show on first section */}
+                {index === 0 && (
+                  <>
+                    <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-white/90">
+                      {[
+                        { label: 'Days', value: countdown.days },
+                        { label: 'Hours', value: countdown.hours },
+                        { label: 'Minutes', value: countdown.minutes },
+                        { label: 'Seconds', value: countdown.seconds },
+                      ].map((unit) => (
+                        <div key={unit.label} className="min-w-[60px] sm:min-w-[70px] text-center">
+                          <div className="text-2xl sm:text-3xl md:text-4xl font-bold">{String(unit.value).padStart(2, '0')}</div>
+                          <div className="text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-white/70">{unit.label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Detail Blocks - Only show on first section */}
+                    <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+                      {detailBlocks.map((block) => (
+                        <div
+                          key={block.label}
+                          className="bg-white/10 backdrop-blur-sm border border-white/20 p-3 sm:p-4 rounded-lg shadow-lg"
+                        >
+                          <p className="text-xs uppercase tracking-[0.3em] text-white/70 mb-2">
+                            {block.label}
+                          </p>
+                          {block.entries.map((entry) => (
+                            entry.href ? (
+                              <p key={entry.text} className="text-sm sm:text-base md:text-lg leading-relaxed">
+                                <a
+                                  href={entry.href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="underline hover:text-white"
+                                >
+                                  {entry.text}
+                                </a>
+                              </p>
+                            ) : (
+                              <p key={entry.text} className="text-sm sm:text-base md:text-lg leading-relaxed">
+                                {entry.text}
+                              </p>
+                            )
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Indicators */}
-      {activeMedia.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-          {activeMedia.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentIndex
-                  ? 'bg-white w-8'
-                  : 'bg-white/50 hover:bg-white/75'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Scroll Indicator */}
-      {activeMedia.length > 1 && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 text-white/70 text-sm animate-bounce">
-          <div className="flex flex-col items-center gap-2">
-            <span>Scroll to navigate</span>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
-        </div>
-      )}
+            </div>
+          )}
+        </section>
+      ))}
     </div>
   );
 }
