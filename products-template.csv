@@ -1,0 +1,6 @@
+name,base_price,sku,description,collection_id,category_id,type_id,compare_at_price,primary_image_url,image_urls,tags,is_featured
+Kanjivaram Pure Silk Saree,9999.00,KAN-001,Beautiful traditional handwoven Kanjivaram silk saree,,,,"12999.00","https://example.com/images/kanjivaram1.jpg","https://example.com/images/kanjivaram1.jpg,https://example.com/images/kanjivaram2.jpg","silk,bridal,traditional",true
+Banarasi Silk Saree,8999.00,BAN-001,Elegant Banarasi silk saree with intricate zari work,,,,"11999.00","https://example.com/images/banarasi1.jpg","https://example.com/images/banarasi1.jpg,https://example.com/images/banarasi2.jpg","silk,festive,wedding",true
+Cotton Handloom Saree,2500.00,COT-001,Comfortable handloom cotton saree for daily wear,,,,"3000.00","https://example.com/images/cotton1.jpg","https://example.com/images/cotton1.jpg","cotton,daily-wear,casual",false
+
+

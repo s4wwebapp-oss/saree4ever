@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saree4ever Logo - Size & Background Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: #333;
+            margin: 2rem 0 1rem;
+            font-size: 1.5rem;
+        }
+
+        .example-section {
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+
+        /* Logo Container Base Styles */
+        .logo-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 2px solid #000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+        }
+
+        .logo-container:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .logo-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        /* Size Presets */
+        .logo-small {
+            width: 128px;
+            height: 48px;
+        }
+
+        .logo-medium {
+            width: 200px;
+            height: 75px;
+        }
+
+        .logo-large {
+            width: 256px;
+            height: 96px;
+        }
+
+        .logo-xlarge {
+            width: 320px;
+            height: 120px;
+        }
+
+        /* Background Color Classes */
+        .bg-white {
+            background-color: white;
+        }
+
+        .bg-black {
+            background-color: #000000;
+        }
+
+        .bg-gray-light {
+            background-color: #f3f4f6;
+        }
+
+        .bg-transparent {
+            background-color: transparent;
+        }
+
+        .bg-gradient {
+            background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
+        }
+
+        /* Display Examples */
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .logo-item {
+            text-align: center;
+        }
+
+        .logo-item p {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .code-block {
+            background: #1a1a1a;
+            color: #f0f0f0;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .code-block code {
+            color: #4ade80;
+        }
+
+        .info-box {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .info-box strong {
+            color: #0284c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Saree4ever Logo - Size & Background Examples</h1>
+
+        <div class="info-box">
+            <strong>Note:</strong> The logo design itself is fixed and cannot be changed. 
+            Only the container size and background color can be customized.
+        </div>
+
+        <!-- Example 1: Size Presets -->
+        <div class="example-section">
+            <h2>1. Size Presets</h2>
+            <p>Use predefined size classes for consistent sizing across your website.</p>
+            <div class="logo-grid">
+                <div class="logo-item">
+                    <div class="logo-container logo-small bg-white">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>Small (128×48px)</p>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-container logo-medium bg-white">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>Medium (200×75px)</p>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-container logo-large bg-white">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>Large (256×96px)</p>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-container logo-xlarge bg-white">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>XLarge (320×120px)</p>
+                </div>
+            </div>
+            <div class="code-block">
+                <code>&lt;!-- Small --&gt;<br>
+&lt;div class="logo-container logo-small bg-white"&gt;<br>
+&nbsp;&nbsp;&lt;img src="/saree4ever-logo.png" alt="Logo" class="logo-image"&gt;<br>
+&lt;/div&gt;<br><br>
+&lt;!-- Medium --&gt;<br>
+&lt;div class="logo-container logo-medium bg-white"&gt;<br>
+&nbsp;&nbsp;&lt;img src="/saree4ever-logo.png" alt="Logo" class="logo-image"&gt;<br>
+&lt;/div&gt;</code>
+            </div>
+        </div>
+
+        <!-- Example 2: Custom Sizes -->
+        <div class="example-section">
+            <h2>2. Custom Sizes</h2>
+            <p>Use inline styles for custom dimensions.</p>
+            <div class="logo-grid">
+                <div class="logo-item">
+                    <div class="logo-container bg-white" style="width: 150px; height: 60px;">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>Custom: 150×60px</p>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-container bg-white" style="width: 300px; height: 100px;">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>Custom: 300×100px</p>
+                </div>
+            </div>
+            <div class="code-block">
+                <code>&lt;div class="logo-container bg-white" style="width: 150px; height: 60px;"&gt;<br>
+&nbsp;&nbsp;&lt;img src="/saree4ever-logo.png" alt="Logo" class="logo-image"&gt;<br>
+&lt;/div&gt;</code>
+            </div>
+        </div>
+
+        <!-- Example 3: Background Colors -->
+        <div class="example-section">
+            <h2>3. Background Colors</h2>
+            <p>Change the background color to match your design.</p>
+            <div class="logo-grid">
+                <div class="logo-item">
+                    <div class="logo-container logo-medium bg-white">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>White Background</p>
+                </div>
+                <div class="logo-item" style="background: #000; padding: 1rem; border-radius: 8px;">
+                    <div class="logo-container logo-medium bg-black">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p style="color: white;">Black Background</p>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-container logo-medium bg-gray-light">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>Light Gray Background</p>
+                </div>
+                <div class="logo-item" style="background: linear-gradient(135deg, #fce7f3 0%, #f3e8ff 100%); padding: 1rem; border-radius: 8px;">
+                    <div class="logo-container logo-medium bg-transparent">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                    <p>Transparent Background</p>
+                </div>
+            </div>
+            <div class="code-block">
+                <code>&lt;!-- White --&gt;<br>
+&lt;div class="logo-container logo-medium bg-white"&gt;...&lt;/div&gt;<br><br>
+&lt;!-- Black --&gt;<br>
+&lt;div class="logo-container logo-medium bg-black"&gt;...&lt;/div&gt;<br><br>
+&lt;!-- Custom Color --&gt;<br>
+&lt;div class="logo-container logo-medium" style="background-color: #f3f4f6;"&gt;...&lt;/div&gt;<br><br>
+&lt;!-- Transparent --&gt;<br>
+&lt;div class="logo-container logo-medium bg-transparent"&gt;...&lt;/div&gt;</code>
+            </div>
+        </div>
+
+        <!-- Example 4: As a Link -->
+        <div class="example-section">
+            <h2>4. Logo as a Link</h2>
+            <p>Wrap the logo container in an anchor tag to make it clickable.</p>
+            <div style="margin: 1.5rem 0;">
+                <a href="/" style="text-decoration: none; display: inline-block;">
+                    <div class="logo-container logo-medium bg-white">
+                        <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                    </div>
+                </a>
+            </div>
+            <div class="code-block">
+                <code>&lt;a href="/"&gt;<br>
+&nbsp;&nbsp;&lt;div class="logo-container logo-medium bg-white"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;img src="/saree4ever-logo.png" alt="Logo" class="logo-image"&gt;<br>
+&nbsp;&nbsp;&lt;/div&gt;<br>
+&lt;/a&gt;</code>
+            </div>
+        </div>
+
+        <!-- Example 5: Responsive Usage -->
+        <div class="example-section">
+            <h2>5. Responsive Usage (CSS Media Queries)</h2>
+            <p>Use media queries to adjust logo size for different screen sizes.</p>
+            <div class="code-block">
+                <code>&lt;style&gt;<br>
+.logo-responsive {<br>
+&nbsp;&nbsp;width: 128px;<br>
+&nbsp;&nbsp;height: 48px;<br>
+}<br><br>
+@media (min-width: 768px) {<br>
+&nbsp;&nbsp;.logo-responsive {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;width: 200px;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;height: 75px;<br>
+&nbsp;&nbsp;}<br>
+}<br><br>
+@media (min-width: 1024px) {<br>
+&nbsp;&nbsp;.logo-responsive {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;width: 256px;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;height: 96px;<br>
+&nbsp;&nbsp;}<br>
+}<br>
+&lt;/style&gt;<br><br>
+&lt;div class="logo-container logo-responsive bg-white"&gt;<br>
+&nbsp;&nbsp;&lt;img src="/saree4ever-logo.png" alt="Logo" class="logo-image"&gt;<br>
+&lt;/div&gt;</code>
+            </div>
+        </div>
+
+        <!-- Example 6: Header Implementation -->
+        <div class="example-section">
+            <h2>6. Complete Header Example</h2>
+            <p>Full header implementation with logo.</p>
+            <div style="border: 1px solid #e5e5e5; padding: 1rem; margin: 1.5rem 0; background: white;">
+                <header style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/" style="text-decoration: none;">
+                        <div class="logo-container logo-medium bg-white">
+                            <img src="/saree4ever-logo.png" alt="Saree4ever Logo" class="logo-image">
+                        </div>
+                    </a>
+                    <nav style="display: flex; gap: 1.5rem;">
+                        <a href="#" style="text-decoration: none; color: #333;">Home</a>
+                        <a href="#" style="text-decoration: none; color: #333;">Collections</a>
+                        <a href="#" style="text-decoration: none; color: #333;">About</a>
+                    </nav>
+                </header>
+            </div>
+            <div class="code-block">
+                <code>&lt;header style="display: flex; justify-content: space-between; align-items: center;"&gt;<br>
+&nbsp;&nbsp;&lt;a href="/"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="logo-container logo-medium bg-white"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;img src="/saree4ever-logo.png" alt="Logo" class="logo-image"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
+&nbsp;&nbsp;&lt;/a&gt;<br>
+&nbsp;&nbsp;&lt;nav&gt;...&lt;/nav&gt;<br>
+&lt;/header&gt;</code>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+

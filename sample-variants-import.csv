@@ -1,0 +1,38 @@
+product_sku,name,sku,price,color,has_blouse,blouse_included,stock_quantity,size,compare_at_price
+KAN-SILK-001,Kanjivaram Silk - Maroon Red,KAN-SILK-001-MAR,12999,Maroon Red,true,true,5,One Size,15999
+KAN-SILK-001,Kanjivaram Silk - Royal Blue,KAN-SILK-001-BLUE,12999,Royal Blue,true,true,3,One Size,15999
+KAN-SILK-001,Kanjivaram Silk - Emerald Green,KAN-SILK-001-GRN,12999,Emerald Green,true,true,4,One Size,15999
+BAN-SILK-001,Banarasi Silk - Deep Red,BAN-SILK-001-RED,9999,Deep Red,true,true,8,One Size,12999
+BAN-SILK-001,Banarasi Silk - Golden Beige,BAN-SILK-001-GOLD,9999,Golden Beige,true,true,6,One Size,12999
+BAN-SILK-001,Banarasi Silk - Purple,BAN-SILK-001-PUR,9999,Purple,true,true,5,One Size,12999
+TUS-SILK-001,Tussar Silk - Mustard Yellow,TUS-SILK-001-MUS,6999,Mustard Yellow,false,false,10,One Size,8999
+TUS-SILK-001,Tussar Silk - Olive Green,TUS-SILK-001-OLV,6999,Olive Green,false,false,12,One Size,8999
+TUS-SILK-001,Tussar Silk - Terracotta,TUS-SILK-001-TER,6999,Terracotta,false,false,8,One Size,8999
+COT-HL-001,Cotton Handloom - White,COT-HL-001-WHT,2499,White,false,false,20,One Size,3499
+COT-HL-001,Cotton Handloom - Cream,COT-HL-001-CRM,2499,Cream,false,false,15,One Size,3499
+COT-HL-001,Cotton Handloom - Sky Blue,COT-HL-001-SKY,2499,Sky Blue,false,false,18,One Size,3499
+GEO-PARTY-001,Georgette Party - Black,GEO-PARTY-001-BLK,4999,Black,true,true,12,One Size,6999
+GEO-PARTY-001,Georgette Party - Wine Red,GEO-PARTY-001-WINE,4999,Wine Red,true,true,10,One Size,6999
+GEO-PARTY-001,Georgette Party - Navy Blue,GEO-PARTY-001-NAVY,4999,Navy Blue,true,true,8,One Size,6999
+CHF-PRINT-001,Chiffon Print - Pink Floral,CHF-PRINT-001-PINK,3999,Pink,false,false,15,One Size,5499
+CHF-PRINT-001,Chiffon Print - Blue Floral,CHF-PRINT-001-BLUE,3999,Blue,false,false,12,One Size,5499
+CHF-PRINT-001,Chiffon Print - Peach Floral,CHF-PRINT-001-PEACH,3999,Peach,false,false,10,One Size,5499
+PAT-SILK-001,Patola - Red & Green,PAT-SILK-001-RG,14999,Red & Green,true,true,2,One Size,18999
+PAT-SILK-001,Patola - Blue & Gold,PAT-SILK-001-BG,14999,Blue & Gold,true,true,3,One Size,18999
+MYS-SILK-001,Mysore Silk - Burgundy,MYS-SILK-001-BUR,8999,Burgundy,true,true,7,One Size,11999
+MYS-SILK-001,Mysore Silk - Bottle Green,MYS-SILK-001-GRN,8999,Bottle Green,true,true,6,One Size,11999
+MYS-SILK-001,Mysore Silk - Royal Purple,MYS-SILK-001-PUR,8999,Royal Purple,true,true,5,One Size,11999
+LIN-ECO-001,Linen Cotton - Natural Beige,LIN-ECO-001-NAT,3499,Natural Beige,false,false,15,One Size,4999
+LIN-ECO-001,Linen Cotton - Earth Brown,LIN-ECO-001-BRN,3499,Earth Brown,false,false,12,One Size,4999
+KAN-TEMP-001,Temple Design - Crimson Red,KAN-TEMP-001-CRIM,15999,Crimson Red,true,true,4,One Size,19999
+KAN-TEMP-001,Temple Design - Royal Blue,KAN-TEMP-001-ROYAL,15999,Royal Blue,true,true,3,One Size,19999
+NET-EMB-001,Net Embroidered - Ivory,NET-EMB-001-IVR,8499,Ivory,true,true,6,One Size,11999
+NET-EMB-001,Net Embroidered - Rose Gold,NET-EMB-001-ROSE,8499,Rose Gold,true,true,5,One Size,11999
+CHA-SILK-001,Chanderi - Light Pink,CHA-SILK-001-PINK,5499,Light Pink,false,false,10,One Size,7499
+CHA-SILK-001,Chanderi - Mint Green,CHA-SILK-001-MINT,5499,Mint Green,false,false,8,One Size,7499
+ORG-FLORAL-001,Organza Floral - Multi Color,ORG-FLORAL-001-MULTI,4499,Multi Color,false,false,12,One Size,6499
+BAN-TIE-001,Bandhani - Traditional Red,BAN-TIE-001-RED,6499,Traditional Red,false,false,8,One Size,8999
+BAN-TIE-001,Bandhani - Yellow & Orange,BAN-TIE-001-YEL,6499,Yellow & Orange,false,false,7,One Size,8999
+ART-SILK-001,Art Silk - Cherry Red,ART-SILK-001-CHER,1999,Cherry Red,false,false,25,One Size,2999
+ART-SILK-001,Art Silk - Teal Blue,ART-SILK-001-TEAL,1999,Teal Blue,false,false,20,One Size,2999
+ART-SILK-001,Art Silk - Magenta,ART-SILK-001-MAG,1999,Magenta,false,false,22,One Size,2999

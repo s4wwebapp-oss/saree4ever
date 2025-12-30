@@ -1,0 +1,10 @@
+product_sku,name,sku,price,color,has_blouse,blouse_included,stock_quantity,image_url
+KAN-001,Maroon with Blouse,KAN-001-MAR,9999.00,Maroon,true,true,15,https://example.com/images/variants/kanjivaram-maroon.jpg
+KAN-001,Red with Blouse,KAN-001-RED,9999.00,Red,true,true,10,https://example.com/images/variants/kanjivaram-red.jpg
+KAN-001,Blue without Blouse,KAN-001-BLU,8999.00,Blue,false,false,20,https://example.com/images/variants/kanjivaram-blue.jpg
+BAN-001,Green with Blouse,BAN-001-GRN,8999.00,Green,true,true,12,https://example.com/images/variants/banarasi-green.jpg
+BAN-001,Gold with Blouse,BAN-001-GLD,8999.00,Gold,true,true,8,https://example.com/images/variants/banarasi-gold.jpg
+COT-001,White with Border,COT-001-WHT,2500.00,White,false,false,25,https://example.com/images/variants/cotton-white.jpg
+COT-001,Blue Printed,COT-001-BLU,2500.00,Blue,false,false,30,https://example.com/images/variants/cotton-blue.jpg
+
+

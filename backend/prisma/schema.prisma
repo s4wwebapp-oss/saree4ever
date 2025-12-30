@@ -1,0 +1,455 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["public"]
+}
+
+model Collection {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String              @unique
+  slug                String              @unique
+  description         String?
+  image_url           String?
+  is_active           Boolean             @default(true)
+  display_order       Int                 @default(0)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  product_collections ProductCollection[]
+  products            Product[]
+
+  @@index([is_active])
+  @@index([display_order])
+  @@map("collections")
+  @@schema("public")
+}
+
+model Category {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String            @unique
+  slug               String            @unique
+  description        String?
+  image_url          String?
+  icon               String?
+  is_active          Boolean           @default(true)
+  display_order      Int               @default(0)
+  created_at         DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime          @default(now()) @db.Timestamptz(6)
+  product_categories ProductCategory[]
+  products           Product[]
+
+  @@index([is_active])
+  @@index([display_order])
+  @@map("categories")
+  @@schema("public")
+}
+
+model Type {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String        @unique
+  slug          String        @unique
+  description   String?
+  image_url     String?
+  is_active     Boolean       @default(true)
+  display_order Int           @default(0)
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime      @default(now()) @db.Timestamptz(6)
+  product_types ProductType[]
+  products      Product[]
+
+  @@index([is_active])
+  @@index([display_order])
+  @@map("types")
+  @@schema("public")
+}
+
+model Product {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  slug                String              @unique
+  description         String?
+  long_description    String?
+  collection_id       String?             @db.Uuid
+  category_id         String?             @db.Uuid
+  type_id             String?             @db.Uuid
+  base_price          Decimal             @db.Decimal(10, 2)
+  compare_at_price    Decimal?            @db.Decimal(10, 2)
+  primary_image_url   String?
+  image_urls          String[]            @default([])
+  sku                 String?             @unique
+  tags                String[]            @default([])
+  is_featured         Boolean             @default(false)
+  is_active           Boolean             @default(true)
+  display_order       Int                 @default(0)
+  meta_title          String?
+  meta_description    String?
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  blouse_included     Boolean             @default(false)
+  color               String?
+  length_m            Decimal?            @db.Decimal(4, 2)
+  subcategories       String[]            @default([])
+  weave               String?
+  mrp                 Decimal?            @db.Decimal(10, 2)
+  order_items         OrderItem[]
+  product_categories  ProductCategory[]
+  product_collections ProductCollection[]
+  product_types       ProductType[]
+  category            Category?           @relation(fields: [category_id], references: [id])
+  collection          Collection?         @relation(fields: [collection_id], references: [id])
+  type                Type?               @relation(fields: [type_id], references: [id])
+  variants            Variant[]
+
+  @@index([collection_id])
+  @@index([category_id])
+  @@index([type_id])
+  @@index([is_active])
+  @@index([is_featured])
+  @@index([slug])
+  @@map("products")
+  @@schema("public")
+}
+
+model ProductCollection {
+  product_id    String     @db.Uuid
+  collection_id String     @db.Uuid
+  display_order Int        @default(0)
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  collection    Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)
+  product       Product    @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@id([product_id, collection_id])
+  @@map("product_collections")
+  @@schema("public")
+}
+
+model ProductCategory {
+  product_id    String   @db.Uuid
+  category_id   String   @db.Uuid
+  display_order Int      @default(0)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  category      Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  product       Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@id([product_id, category_id])
+  @@map("product_categories")
+  @@schema("public")
+}
+
+model ProductType {
+  product_id    String   @db.Uuid
+  type_id       String   @db.Uuid
+  display_order Int      @default(0)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  product       Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  type          Type     @relation(fields: [type_id], references: [id], onDelete: Cascade)
+
+  @@id([product_id, type_id])
+  @@map("product_types")
+  @@schema("public")
+}
+
+model Variant {
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_id       String      @db.Uuid
+  name             String
+  sku              String?     @unique
+  price            Decimal?    @db.Decimal(10, 2)
+  compare_at_price Decimal?    @db.Decimal(10, 2)
+  color            String?
+  has_blouse       Boolean     @default(false)
+  blouse_included  Boolean     @default(false)
+  size             String?
+  image_url        String?
+  stock_quantity   Int         @default(0)
+  track_inventory  Boolean     @default(true)
+  is_active        Boolean     @default(true)
+  display_order    Int         @default(0)
+  created_at       DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime    @default(now()) @db.Timestamptz(6)
+  inventory        Inventory[]
+  order_items      OrderItem[]
+  product          Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id])
+  @@index([sku])
+  @@index([is_active])
+  @@index([stock_quantity])
+  @@map("variants")
+  @@schema("public")
+}
+
+model Inventory {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  variant_id       String   @db.Uuid
+  quantity_change  Int
+  quantity_before  Int
+  quantity_after   Int
+  type             String
+  order_id         String?  @db.Uuid
+  reference_number String?
+  notes            String?
+  user_id          String?  @db.Uuid
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  variant          Variant  @relation(fields: [variant_id], references: [id], onDelete: Cascade)
+
+  @@index([variant_id])
+  @@index([order_id])
+  @@index([type])
+  @@index([created_at(sort: Desc)])
+  @@map("inventory")
+  @@schema("public")
+}
+
+model Order {
+  id                     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_number           String      @unique
+  user_id                String?     @db.Uuid
+  email                  String
+  phone                  String?
+  shipping_name          String
+  shipping_address_line1 String
+  shipping_address_line2 String?
+  shipping_city          String
+  shipping_state         String
+  shipping_postal_code   String
+  shipping_country       String      @default("India")
+  billing_name           String?
+  billing_address_line1  String?
+  billing_address_line2  String?
+  billing_city           String?
+  billing_state          String?
+  billing_postal_code    String?
+  billing_country        String?
+  subtotal               Decimal     @db.Decimal(10, 2)
+  tax_amount             Decimal     @default(0) @db.Decimal(10, 2)
+  shipping_amount        Decimal     @default(0) @db.Decimal(10, 2)
+  discount_amount        Decimal     @default(0) @db.Decimal(10, 2)
+  total_amount           Decimal     @db.Decimal(10, 2)
+  payment_status         String      @default("pending")
+  payment_method         String?
+  payment_transaction_id String?
+  status                 String      @default("pending")
+  tracking_number        String?
+  shipped_at             DateTime?   @db.Timestamptz(6)
+  delivered_at           DateTime?   @db.Timestamptz(6)
+  customer_notes         String?
+  admin_notes            String?
+  created_at             DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime    @default(now()) @db.Timestamptz(6)
+  coupon_code            String?
+  coupon_discount_amount Decimal?    @db.Decimal(10, 2)
+  order_items            OrderItem[]
+
+  @@index([user_id])
+  @@index([order_number])
+  @@index([status])
+  @@index([payment_status])
+  @@index([created_at(sort: Desc)])
+  @@map("orders")
+  @@schema("public")
+}
+
+model OrderItem {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id          String   @db.Uuid
+  variant_id        String   @db.Uuid
+  product_id        String   @db.Uuid
+  product_name      String
+  variant_name      String?
+  sku               String?
+  unit_price        Decimal  @db.Decimal(10, 2)
+  quantity          Int
+  total_price       Decimal  @db.Decimal(10, 2)
+  product_image_url String?
+  variant_image_url String?
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  order             Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product           Product  @relation(fields: [product_id], references: [id])
+  variant           Variant  @relation(fields: [variant_id], references: [id])
+
+  @@index([order_id])
+  @@index([variant_id])
+  @@index([product_id])
+  @@map("order_items")
+  @@schema("public")
+}
+
+model Coupon {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                String             @unique
+  description         String?
+  discount_type       String             @default("percentage")
+  discount_value      Decimal            @db.Decimal(10, 2)
+  max_discount_amount Decimal?           @db.Decimal(10, 2)
+  min_cart_total      Decimal?           @db.Decimal(10, 2)
+  usage_limit         Int?
+  usage_count         Int                @default(0)
+  starts_at           DateTime?          @db.Timestamptz(6)
+  expires_at          DateTime?          @db.Timestamptz(6)
+  is_active           Boolean            @default(true)
+  created_at          DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime           @default(now()) @db.Timestamptz(6)
+  redemptions         CouponRedemption[]
+
+  @@index([is_active])
+  @@index([starts_at])
+  @@index([expires_at])
+  @@map("coupons")
+  @@schema("public")
+}
+
+model CouponRedemption {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coupon_id       String   @db.Uuid
+  order_id        String   @db.Uuid
+  order_number    String
+  discount_amount Decimal  @db.Decimal(10, 2)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  coupon          Coupon   @relation(fields: [coupon_id], references: [id], onDelete: Cascade)
+
+  @@index([coupon_id])
+  @@index([order_id])
+  @@map("coupon_redemptions")
+  @@schema("public")
+}
+
+model UserProfile {
+  id                  String   @id @db.Uuid
+  full_name           String?
+  phone               String?
+  avatar_url          String?
+  address_line1       String?
+  address_line2       String?
+  city                String?
+  state               String?
+  postal_code         String?
+  country             String   @default("India")
+  email_notifications Boolean  @default(true)
+  sms_notifications   Boolean  @default(false)
+  is_active           Boolean  @default(true)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("user_profiles")
+  @@schema("public")
+}
+
+model HeroSlide {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title         String
+  subtitle      String?
+  image_url     String
+  button_text   String   @default("Shop Now")
+  button_link   String   @default("/collections/new-arrivals")
+  display_order Int      @default(0)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([is_active])
+  @@index([display_order])
+  @@map("hero_slides")
+  @@schema("public")
+}
+
+model BlogArticle {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String
+  slug            String   @unique
+  excerpt         String?
+  content         String?
+  author_id       String?  @db.Uuid
+  author_name     String?
+  cover_image_url String?
+  is_featured     Boolean  @default(false)
+  is_published    Boolean  @default(true)
+  published_at    DateTime @default(now()) @db.Timestamptz(6)
+  category        String?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @default(now()) @db.Timestamptz(6)
+  status          String   @default("published")
+
+  @@index([is_published])
+  @@index([slug])
+  @@index([author_id])
+  @@map("blog_articles")
+  @@schema("public")
+}
+
+model AnnouncementBar {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  text             String
+  link_url         String?
+  background_color String   @default("#000000")
+  text_color       String   @default("#ffffff")
+  is_active        Boolean  @default(false)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([is_active])
+  @@map("announcement_bars")
+  @@schema("public")
+}
+
+model Testimonial {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customer_name String
+  customer_role String?
+  content       String
+  rating        Int      @default(5)
+  image_url     String?
+  is_active     Boolean  @default(true)
+  display_order Int      @default(0)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([is_active])
+  @@map("testimonials")
+  @@schema("public")
+}
+
+model LandingPageVideo {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title             String?
+  video_url         String?
+  thumbnail_url     String?
+  is_active         Boolean  @default(true)
+  display_order     Int      @default(0)
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  autoplay          Boolean  @default(true)
+  loop              Boolean  @default(true)
+  muted             Boolean  @default(true)
+  updated_at        DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  video_file_path   String?
+  video_orientation String   @default("horizontal")
+
+  @@index([is_active])
+  @@index([display_order])
+  @@map("landing_page_videos")
+  @@schema("public")
+}
+
+model LandingPageSection {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  section_key String   @unique
+  is_visible  Boolean  @default(true)
+  settings    Json?    @db.Json
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("landing_page_sections")
+  @@schema("public")
+}
+
+model SocialMediaSetting {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  platform      String  @unique
+  url           String
+  icon_name     String?
+  is_visible    Boolean @default(true)
+  display_order Int     @default(0)
+
+  @@map("social_media_settings")
+  @@schema("public")
+}

@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: white;
+    color: black;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Serif heading class for titles */
+  .heading-serif {
+    @apply font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
+  }
+
+  .heading-serif-md {
+    @apply font-serif text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight;
+  }
+
+  .heading-serif-sm {
+    @apply font-serif text-xl md:text-2xl font-semibold tracking-tight;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-black text-white px-4 py-2.5 rounded-none font-medium hover:bg-gray-900 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-black border-2 border-black px-6 py-3 rounded-none font-medium hover:bg-gray-50 transition-colors;
+  }
+
+  .btn-outline {
+    @apply border border-black text-black px-4 py-2.5 rounded-none font-medium hover:bg-black hover:text-white transition-colors;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply w-full border border-black bg-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black;
+  }
+
+  /* Product card */
+  .product-card {
+    @apply bg-white border border-gray-200 hover:border-black transition-colors;
+  }
+
+  /* Blog article prose styles */
+  .prose {
+    @apply text-gray-700 leading-relaxed;
+  }
+
+  .prose h2 {
+    @apply font-serif text-2xl font-bold text-black mt-8 mb-4;
+  }
+
+  .prose h3 {
+    @apply font-serif text-xl font-semibold text-black mt-6 mb-3;
+  }
+
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply my-4 pl-6;
+  }
+
+  .prose ul {
+    @apply list-disc;
+  }
+
+  .prose ol {
+    @apply list-decimal;
+  }
+
+  .prose li {
+    @apply mb-2;
+  }
+
+  .prose strong {
+    @apply font-semibold text-black;
+  }
+
+  .prose em {
+    @apply italic;
+  }
+
+  .prose a {
+    @apply text-black border-b border-black pb-0.5 no-underline;
+  }
+
+  .prose a:hover {
+    @apply border-gray-400;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-gray-300 pl-4 italic my-4 text-gray-600;
+  }
+
+  .prose code {
+    @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono;
+  }
+
+  .prose pre {
+    @apply bg-gray-100 p-4 rounded overflow-x-auto my-4;
+  }
+
+  .prose img {
+    @apply my-6 rounded-lg;
+  }
+
+  /* Logo image styling - Reference size: 256x96px (2.667:1 aspect ratio, 8:3 ratio) */
+  .logo-container {
+    padding: 0;
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+    position: relative;
+    z-index: 10;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: white !important;
+  }
+
+  /* Hover effects - only apply if logo-hover class is present */
+  .logo-text-container.logo-hover:hover .logo-text {
+    opacity: 0.9;
+  }
+
+  /* Responsive logo sizes */
+  @media (max-width: 768px) {
+    .logo-container {
+      padding: 0;
+      background: white !important;
+    }
+    
+    .logo-image {
+      background: white !important;
+    }
+  }
+
+  /* CSS Logo styling */
+  .logo-css-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .logo-css-hover:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+  }
+
+  .logo-css-container .logo-top-text {
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .logo-css-container .logo-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-weight: 700;
+  }
+
+  .logo-css-container .logo-s {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-weight: 900;
+    font-style: italic;
+    display: inline-block;
+    transform: rotate(-5deg);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .logo-css-container .logo-4ever {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .logo-css-container .logo-tagline {
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    line-height: 1.2;
+    font-style: italic;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+body.coming-soon-mode .coming-soon-hide-search {
+  display: none !important;
+}
+
+body.coming-soon-mode .coming-soon-hide-nav {
+  display: none !important;
+}
+
+/* Remove left and top positioning from nextjs-portal elements */
+nextjs-portal {
+  left: unset !important;
+  top: unset !important;
+}
