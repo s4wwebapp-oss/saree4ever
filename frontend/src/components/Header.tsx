@@ -809,8 +809,9 @@ export default function Header({}) {
             </Link>
             <Link
               href="/stories"
-              className="text-sm font-medium text-black"
-              onClick={() => setIsMenuOpen(false)}
+              className={`text-sm font-medium whitespace-nowrap hover:underline text-black ${
+                isActive('/stories') ? 'font-semibold underline' : ''
+              }`}
             >
               Stories
             </Link>

@@ -117,7 +117,7 @@ export default function OrderDetailPage() {
     try {
       await api.orders.ship(orderId, {
         tracking_number: trackingNumber,
-        carrier,
+        courier_name: carrier, // Updated to match backend expectation (courier_name)
       });
       loadOrder();
       setTrackingNumber('');

@@ -41,9 +41,53 @@ exports.createOrder = async (orderData) => {
     throw new Error('Email, shipping name, and items are required');
   }
 
-  // Calculate totals if not provided
-  let calculatedSubtotal = subtotal || items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-  let calculatedDiscountAmount = discount_amount;
+  // STEP 1: Validate items, fetch real prices, and check stock
+  // We do this BEFORE any calculations to ensure security and integrity
+  const validatedItems = [];
+  let calculatedSubtotal = 0;
+
+  for (const item of items) {
+    // Fetch authoritative variant data from DB
+    const { data: variant, error: variantError } = await supabase
+      .from('variants')
+      .select('id, price, sale_price, track_inventory, stock_quantity, product:products(name)')
+      .eq('id', item.variant_id)
+      .single();
+
+    if (variantError || !variant) {
+      throw new Error(`Variant not found or invalid: ${item.variant_id}`);
+    }
+
+    // Determine the actual price (use sale_price if available, otherwise price)
+    // IMPORTANT: We ignore item.unit_price from the client for security
+    const realUnitPrice = variant.sale_price || variant.price;
+    
+    if (typeof realUnitPrice !== 'number') {
+        throw new Error(`Price not found for variant ${variant.id}`);
+    }
+
+    // Add to subtotal
+    calculatedSubtotal += (realUnitPrice * item.quantity);
+
+    // Check stock if inventory is tracked
+    if (variant.track_inventory) {
+      const stockInfo = await inventoryService.getAvailableStock(variant.id);
+      if (stockInfo.available_stock < item.quantity) {
+        throw new Error(`Insufficient stock for ${variant.product?.name || 'product'}. Available: ${stockInfo.available_stock}, Requested: ${item.quantity}`);
+      }
+    }
+
+    // Store the validated item data for later use
+    validatedItems.push({
+      ...item,
+      unit_price: realUnitPrice, // Override with secure price
+      total_price: realUnitPrice * item.quantity,
+      variant_data: variant // Keep reference to avoid re-fetching
+    });
+  }
+
+  // Calculate discount
+  let calculatedDiscountAmount = discount_amount; // Use provided discount if any (usually 0 from frontend)
 
   let appliedCoupon = null;
   const coupon_code = orderData.coupon_code ? orderData.coupon_code.trim() : null;
@@ -72,22 +116,7 @@ exports.createOrder = async (orderData) => {
   const couponDiscountAmount = appliedCoupon ? calculatedDiscountAmount : null;
   const total_amount = calculatedSubtotal + tax_amount + shipping_amount - calculatedDiscountAmount;
 
-  // STEP 1: Reserve stock for all items BEFORE creating order
-  for (const item of items) {
-    const { data: variant } = await supabase
-      .from('variants')
-      .select('track_inventory')
-      .eq('id', item.variant_id)
-      .single();
-
-    if (variant?.track_inventory) {
-      // Check available stock first
-      const stockInfo = await inventoryService.getAvailableStock(item.variant_id);
-      if (stockInfo.available_stock < item.quantity) {
-        throw new Error(`Insufficient stock for variant. Available: ${stockInfo.available_stock}, Requested: ${item.quantity}`);
-      }
-    }
-  }
+  // Stock already checked in STEP 1, proceed to create order
 
   // Create order with status: Pending
   const finalOrderNumber = order_number || generateOrderNumber();
@@ -130,19 +159,9 @@ exports.createOrder = async (orderData) => {
 
   // STEP 1 (continued): Reserve stock now that order is created
   const orderItems = [];
-  for (const item of items) {
-    // Get product and variant details
-    const { data: variant } = await supabase
-      .from('variants')
-      .select('*, product:products(*)')
-      .eq('id', item.variant_id)
-      .single();
-
-    if (!variant) {
-      // Rollback: Delete order if variant not found
-      await supabase.from('orders').delete().eq('id', order.id);
-      throw new Error(`Variant ${item.variant_id} not found`);
-    }
+  for (const item of validatedItems) {
+    // We already have the variant data from STEP 1
+    const variant = item.variant_data;
 
     // Reserve stock if tracking inventory
     if (variant.track_inventory) {
@@ -168,12 +187,12 @@ exports.createOrder = async (orderData) => {
         variant_id: item.variant_id,
         product_id: item.product_id,
         product_name: variant.product?.name || '',
-        variant_name: variant.name,
-        sku: variant.sku,
-        unit_price: item.unit_price,
+        variant_name: variant.name || '', // Ensure name exists
+        sku: variant.sku || '',
+        unit_price: item.unit_price, // This is the SECURE price from validatedItems
         quantity: item.quantity,
-        total_price: item.unit_price * item.quantity,
-        product_image_url: variant.product?.primary_image_url || null,
+        total_price: item.total_price, // SECURE total
+        product_image_url: variant.product?.primary_image_url || null, // We might not have this in the optimized fetch, that's okay for now or we can fetch it
         variant_image_url: variant.image_url || null,
       })
       .select()

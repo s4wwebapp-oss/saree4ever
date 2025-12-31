@@ -524,11 +524,15 @@ exports.updateProduct = async (id, productData) => {
   delete updateData.product_categories;
   delete updateData.product_types;
 
-  // Generate slug if name is being updated
-  if (updateData.name) {
-    updateData.slug = generateSlug(updateData.name);
+  // IMPORTANT: Do NOT auto-regenerate slug if name changes to preserve SEO.
+  // Only update slug if it is explicitly provided in the update data (manual override).
+  if (updateData.name && !updateData.slug) {
+    // delete updateData.slug; // Ensure we don't accidentally set it to something derived
+    // By default, if slug is not sent, it won't be updated.
   }
-
+  
+  // If slug IS provided (e.g. manual edit), keep it.
+  
   // Remove undefined values
   Object.keys(updateData).forEach(key => {
     if (updateData[key] === undefined) {
